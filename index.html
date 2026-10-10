@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Playbook AI-First</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: cabeçalho com duas etapas (Explorar / Construir). Etapa 01 é um universo 3D com lista de mercados à esquerda e painel de detalhe à direita; etapa 02 é o workbook com trilho de capítulos. Single-theme escuro, como a marca. */
+:root{
+  --bg:#08050f; --bg2:#0d0819; --surface:#120c22; --surface2:#1a1230;
+  --line:#271d42; --line2:#3a2b66;
+  --fg:#ece8f7; --muted:#9a90b8; --dim:#6f6592;
+  --accent:#a78bfa; --accent-br:#b9a2ff; --accent-ink:#1a0b3d; --accent-soft:rgba(139,92,246,.14);
+  --fill:#7c4ddf; --fill2:#9b6bf2;
+  --alt:#2dd4bf; --good:#4ade80; --warn:#fbbf24; --bad:#fb7185;
+  --font:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --hh:72px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--font);padding:0;min-height:100%;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.eyebrow{font:500 11px/1.4 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- cabeçalho ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;height:var(--hh);flex:none;display:flex;align-items:center;gap:20px;padding-inline:clamp(16px,2.2vw,40px);background:var(--bg);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;flex:none}
+.logo svg{width:34px;height:40px;flex:none}
+.logo .b360{font:700 34px/1 var(--font);letter-spacing:-.045em}
+.logo .bsub{font:400 13px/1.15 var(--font);color:var(--fg)}
+.top .div{width:1px;height:32px;background:var(--line);flex:none}
+.edition{font:500 10px/1.8 var(--mono);letter-spacing:.32em;color:var(--muted);flex:none}
+.edition b{display:block;color:var(--fg);font-weight:500}
+.tabs{display:flex;gap:6px;margin-inline:auto}
+.tab{display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:10px;border:1px solid transparent;background:none;color:var(--muted);font:500 15px var(--font);white-space:nowrap}
+.tab span{font:500 10px var(--mono)}
+.tab:hover{color:var(--fg)}
+.tab[aria-current="page"]{background:#1b1236;border-color:#3a2a6a;color:var(--fg)}
+.save{display:flex;align-items:center;gap:8px;font:400 12px var(--font);color:var(--muted);flex:none}
+.save i{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+/* ---------- botões ---------- */
+.btn{font:600 13px var(--font);padding:10px 14px;border-radius:9px;border:1px solid var(--fill);background:var(--fill);color:#fff;text-align:center}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line2)}
+.btn.ghost:hover{border-color:var(--muted);filter:none}
+
+/* ---------- etapa 01: universo ---------- */
+#viewAtlas{flex:1;min-height:640px;display:flex;flex-direction:column}
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:clamp(300px,23vw,438px) minmax(0,1fr)}
+.explorer{display:flex;flex-direction:column;min-height:0;min-width:0;border-right:1px solid var(--line);padding:30px clamp(16px,2.2vw,40px) 16px;background:linear-gradient(180deg,#0b0719,#08050f)}
+.intro .eyebrow{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.2em}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);flex:none}
+.intro h1{margin:18px 0 14px;font:400 clamp(2.1rem,3.1vw,3.1rem)/1.02 var(--font);letter-spacing:-.05em;text-wrap:balance}
+.intro h1 span{color:var(--accent-br)}
+.intro p{margin:0;color:var(--muted);font-size:14.5px}
+.explorer-heading{display:flex;align-items:center;justify-content:space-between;margin-top:26px}
+.explorer-heading h2{margin:0;font:600 16px var(--font)}
+.badge{font:500 11px var(--mono);padding:3px 9px;border-radius:6px;border:1px solid var(--line2);background:var(--surface2)}
+.search-box{display:flex;align-items:center;gap:10px;margin-top:14px;padding:0 14px;height:50px;border:1px solid var(--line2);border-radius:10px;background:rgba(18,12,34,.6);color:var(--muted)}
+.search-box:focus-within{border-color:var(--accent)}
+.search-box input{flex:1;min-width:0;background:none;border:0;outline:0;font-size:14.5px;color:var(--fg)}
+.search-box input::placeholder{color:var(--muted)}
+.search-box kbd{font:500 11px var(--mono);border:1px solid var(--line2);border-radius:5px;padding:1px 7px;color:var(--muted)}
+.list-caption{display:flex;justify-content:space-between;margin:22px 0 6px;font:500 10px var(--mono);letter-spacing:.18em;color:var(--dim)}
+.market-list{flex:1;min-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.mk{display:grid;grid-template-columns:10px minmax(0,1fr) auto 14px;gap:14px;align-items:center;text-align:left;width:100%;padding:12px 12px;border-radius:9px;border:1px solid transparent;background:none;color:var(--fg);font:400 15px var(--font)}
+.mk:hover{background:rgba(26,18,48,.7)}
+.mk.on{background:#1a1230;border-color:#3a2a6a}
+.mdot{width:7px;height:7px;border-radius:50%}
+.mname small{display:block;color:var(--muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcount{font:500 11px var(--mono);color:var(--dim)}
+.arr{font-size:12px;color:var(--dim)}
+.mk.on .arr,.mk:hover .arr{color:var(--fg)}
+.empty{color:var(--muted);font-size:13.5px;padding:12px}
+.explorer-foot{display:flex;align-items:center;gap:10px;padding-top:14px;margin-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+
+.universe{position:relative;overflow:hidden;min-width:0;min-height:520px;background:radial-gradient(ellipse at 50% 48%,rgba(110,70,220,.12),transparent 62%),var(--bg)}
+.scene-grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:72px 72px;opacity:.22;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 20%,transparent 72%);mask-image:radial-gradient(ellipse at 50% 50%,#000 20%,transparent 72%)}
+#scene-container{position:absolute;inset:0}
+#map{display:block;width:100%;height:100%;touch-action:none;cursor:grab;outline-offset:-2px}
+.scene-topline{position:absolute;top:26px;left:34px;right:34px;display:flex;justify-content:space-between;gap:12px;pointer-events:none;z-index:2}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--fg);pointer-events:auto;min-width:0;flex-wrap:wrap}
+.breadcrumb button{background:none;border:0;padding:0;font-size:12px;color:var(--fg)}
+.breadcrumb button:hover{text-decoration:underline}
+.breadcrumb .cr{color:var(--muted)}
+.scene-coordinate{font:500 10px var(--mono);letter-spacing:.14em;color:var(--dim);white-space:nowrap}
+.scene-title{position:absolute;top:70px;left:34px;pointer-events:none;z-index:2}
+.scene-title span{display:block;font:500 10px var(--mono);letter-spacing:.3em;color:var(--muted)}
+.scene-title strong{display:block;margin-top:8px;font:400 clamp(1.5rem,2.1vw,2.1rem)/1 var(--font);letter-spacing:.06em}
+.scene-note{position:absolute;right:34px;bottom:118px;display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted);pointer-events:none;z-index:2;text-align:left}
+.scene-note i{display:block;width:26px;height:1px;background:var(--dim)}
+.scene-bottom{position:absolute;left:34px;right:34px;bottom:26px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;z-index:2;pointer-events:none}
+.scene-key{display:flex;gap:18px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.scene-key span{display:flex;align-items:center;gap:7px}
+.scene-key i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.scene-key span:nth-child(2) i{width:5px;height:5px}
+.scene-key span:nth-child(3) i{width:18px;height:1px;border-radius:0}
+.scene-controls{display:flex;align-items:center;gap:2px;pointer-events:auto;border:1px solid var(--line2);border-radius:10px;background:rgba(13,8,25,.85);padding:4px}
+.scene-controls button{width:40px;height:36px;border:0;border-radius:7px;background:none;font-size:18px;color:var(--fg);display:grid;place-items:center}
+.scene-controls button:hover{background:var(--surface2)}
+.scene-controls span{width:1px;height:20px;background:var(--line2);margin-inline:4px}
+.interaction-hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);pointer-events:none;z-index:2;white-space:nowrap}
+.interaction-hint b{color:var(--dim)}
+.back{position:absolute;left:34px;top:130px;z-index:3;padding:10px 16px;border-radius:9px;border:1px solid var(--line2);background:rgba(13,8,25,.85);color:var(--fg);font:500 13px var(--font)}
+.back:hover{border-color:var(--accent)}
+.universe.has-panel .scene-note,.universe.has-panel .interaction-hint{display:none}
+
+.panel{position:absolute;top:0;right:0;bottom:0;width:min(690px,100%);z-index:10;background:var(--bg2);border-left:1px solid var(--line2);transform:translateX(102%);transition:transform .38s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--fill),var(--accent-br) 55%,transparent)}
+.panel.open{transform:none}
+.panel-close{position:absolute;top:18px;right:18px;z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);background:var(--bg2);font-size:15px;color:var(--fg)}
+.panel-close:hover{border-color:var(--accent)}
+.panel-body{flex:1;min-height:0;overflow-y:auto;padding:30px clamp(18px,4vw,40px) 0;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.p-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-right:46px}
+.tagbox{font:500 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--line2);border-radius:4px;padding:3px 7px;color:var(--muted)}
+.linkbtn{background:none;border:0;padding:0;font:500 13px var(--font);color:var(--accent-br)}
+.linkbtn:hover{text-decoration:underline}
+.panel h2{margin:26px 0 12px;font:400 clamp(2rem,4.2vw,3rem)/1.04 var(--font);letter-spacing:-.045em;text-wrap:balance}
+.p-lead{margin:0;font-size:clamp(16px,1.6vw,19px);line-height:1.45;color:#cfc8e6;max-width:46ch}
+.ptabs{display:flex;gap:8px;margin-top:26px;padding-bottom:18px;border-bottom:1px solid var(--line);overflow-x:auto}
+.ptab{display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:9px;border:1px solid transparent;background:none;color:var(--muted);font:500 14px var(--font);white-space:nowrap}
+.ptab span{font:500 10px var(--mono)}
+.ptab.on{background:#1b1236;border-color:#3a2a6a;color:var(--fg)}
+.p-illus{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:8px;align-items:center;margin-top:26px;padding:20px 22px;border:1px solid var(--line);border-radius:14px;background:radial-gradient(ellipse at 25% 60%,rgba(124,77,223,.14),transparent 65%),#0b0716}
+.p-illus .cap{grid-column:1/-1;font:500 9px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.p-illus svg{display:block;width:100%;max-width:300px;height:auto;margin-inline:auto}
+.tl{list-style:none;margin:0;padding:0;display:grid;gap:20px;position:relative}
+.tl::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--line2)}
+.tl li{position:relative;padding-left:28px}
+.tl li::before{content:'';position:absolute;left:0;top:5px;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--accent);background:var(--bg2)}
+.tl li.on::before{width:15px;height:15px;left:-2px;top:3px;background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(167,139,250,.6)}
+.tl small{display:block;font:500 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.tl span{font-size:13.5px}
+.p-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:26px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.p-stats b{display:block;font:300 clamp(2rem,4vw,2.8rem)/1 var(--font);letter-spacing:-.03em}
+.p-stats span{font-size:12.5px;color:var(--muted)}
+.p-thesis{margin:22px 0 0;font-size:clamp(15px,1.5vw,17px);line-height:1.55;color:#d9d3ee;max-width:60ch}
+.p-sec{display:flex;justify-content:space-between;gap:12px;margin:30px 0 12px}
+.niche-list{display:grid;gap:10px;padding-bottom:28px}
+.niche-btn{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px;align-items:center;text-align:left;padding:16px 20px;border-radius:12px;border:1px solid var(--line);background:#0b0716}
+.niche-btn:hover{border-color:var(--accent);background:#120b24}
+.niche-btn .nn{font:500 11px var(--mono);color:var(--dim)}
+.niche-btn b{display:block;font:500 17px var(--font);margin-bottom:2px}
+.niche-btn small{color:var(--muted);font-size:13.5px}
+.niche-btn .arr{font-size:16px;color:var(--muted)}
+.loss{display:grid;gap:10px;padding-bottom:20px}
+.loss div{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:#0b0716;font-size:14.5px}
+.loss span{font:500 11px var(--mono);color:var(--accent)}
+.flowlist{list-style:none;margin:26px 0 0;padding:0 0 24px;display:grid;gap:10px}
+.flowlist li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:16px;align-items:baseline;padding:14px 18px;border:1px solid var(--line);border-radius:12px;background:#0b0716}
+.flowlist b{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px;margin-top:26px}
+.calc div{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:#0b0716;display:flex;flex-direction:column;gap:4px}
+.calc b{font:600 clamp(1.4rem,2.6vw,1.9rem)/1.1 var(--font);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.calc span{font-size:12.5px;color:var(--muted)}
+.calc-note{margin:16px 0 24px;font-size:13.5px;color:var(--muted);max-width:60ch}
+.p-cta{position:sticky;bottom:0;margin-inline:calc(-1*clamp(18px,4vw,40px));padding:30px clamp(18px,4vw,40px) 18px;background:linear-gradient(180deg,transparent,var(--bg2) 38%)}
+.cta{width:100%;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border:0;border-radius:10px;background:linear-gradient(90deg,var(--fill),var(--fill2));color:#fff;font:600 16px var(--font);box-shadow:0 8px 30px rgba(124,77,223,.35)}
+.cta:hover{filter:brightness(1.08)}
+
+.bottom-bar{flex:none;display:flex;align-items:center;gap:24px;padding:14px clamp(16px,2.2vw,40px);border-top:1px solid var(--line);font-size:12px;color:var(--muted);flex-wrap:wrap}
+.atlas-signature{display:flex;align-items:center;gap:8px;font:500 10px var(--mono);letter-spacing:.18em;text-transform:uppercase}
+.totals{display:flex;align-items:center;gap:18px}
+.totals b{color:var(--fg);font-size:15px;font-weight:500;margin-right:4px}
+.totals i{width:1px;height:16px;background:var(--line2)}
+.footer-note{margin-left:auto}
+
+/* ---------- etapa 02: workbook ---------- */
+#viewWork{flex:1}
+.wb{max-width:1320px;margin-inline:auto;display:grid;grid-template-columns:240px minmax(0,1fr);gap:48px;padding:28px clamp(16px,2.2vw,40px) 80px}
+.chapter-rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hh) + 28px);align-self:start;display:flex;flex-direction:column;gap:20px;max-height:calc(100vh - var(--hh) - 56px);overflow-y:auto;min-width:0;scrollbar-width:thin}
+.chapter-rail h2{margin:0;font:400 26px/1.1 var(--font);letter-spacing:-.04em}
+.prog{display:flex;flex-direction:column;gap:8px}
+.prog span{font-size:11px;color:var(--muted)}
+.track{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+#nav{display:flex;flex-direction:column;gap:2px}
+#nav a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:500}
+#nav a:hover{color:var(--fg)}
+#nav a.on{color:var(--fg);background:var(--surface2)}
+#nav .n{font:500 11px var(--mono);width:18px;flex:none}
+#nav a.on .n{color:var(--accent)}
+.dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--dim);flex:none}
+.dot.done{background:var(--accent);border-color:var(--accent)}
+.dot.none{border-color:transparent}
+.rail-note{border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--muted)}
+.rail-note b{display:block;color:var(--fg);font-weight:600;margin-bottom:2px}
+.rail-note p{margin:0}
+.rail-actions{display:flex;flex-direction:column;gap:8px}
+.workbook-content{min-width:0}
+
+.banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:var(--accent-soft);border:1px solid var(--line2);border-radius:10px;padding:12px 16px;margin-bottom:26px;font-size:13.5px}
+.banner p{margin:0;max-width:70ch;min-width:0}
+.hero{display:flex;flex-direction:column;gap:18px;padding-bottom:24px}
+.hero h1{margin:0;font:400 clamp(2.1rem,4.4vw,3.4rem)/1.04 var(--font);letter-spacing:-.05em;text-wrap:balance;max-width:16ch}
+.hero h1 span{color:var(--accent-br)}
+.hero .lead{margin:0;max-width:62ch;color:var(--muted);font-size:16px}
+.flow-line{display:flex;flex-wrap:wrap;gap:6px 10px;font:500 12px var(--mono);color:var(--muted)}
+.flow-line b{color:var(--fg);font-weight:500}
+.principle{border-top:1px solid var(--line);padding-top:14px;max-width:66ch;display:flex;flex-direction:column;gap:6px}
+.principle p{margin:0}
+.bridge{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;background:var(--surface);border:1px solid var(--line2);border-radius:14px;padding:18px 22px}
+.bridge h2{margin:6px 0 2px;font:500 clamp(1.2rem,2.4vw,1.6rem)/1.2 var(--font);letter-spacing:-.025em}
+.bridge p{margin:0;color:var(--muted);font-size:13.5px;max-width:60ch}
+.feedback{font-size:13.5px;color:var(--alt);margin:10px 0 0;min-height:0}
+.feedback:empty{display:none}
+
+.dash{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hh));z-index:5;background:var(--bg);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding-block:12px;margin-top:14px;border-bottom:1px solid var(--line)}
+.stat{display:flex;flex-direction:column;gap:3px;min-width:0;padding:4px 0}
+.stat .v{font-size:25px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15;overflow-wrap:anywhere}
+.stat .v small{font-size:13px;font-weight:500;color:var(--muted)}
+.stat .s{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.mini{height:3px;border-radius:2px;background:var(--line);overflow:hidden;margin-top:4px}
+.mini i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.chip{display:inline-block;font:600 11px var(--mono);padding:2px 8px;border-radius:99px;border:1px solid currentColor;color:var(--muted)}
+.chip.good{color:var(--good)} .chip.warn{color:var(--warn)} .chip.bad{color:var(--bad)}
+
+.sec{margin-top:64px;scroll-margin-top:calc(var(--hh) + 120px)}
+.sec-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 18px;align-items:baseline;margin-bottom:8px}
+.sec-n{font:500 13px var(--mono);color:var(--accent);padding-top:6px}
+.sec-head h2{margin:0;font:500 clamp(1.5rem,3vw,2rem)/1.15 var(--font);letter-spacing:-.035em;text-wrap:balance}
+.sec-head p{margin:6px 0 0;color:var(--muted);max-width:64ch}
+.sub{margin-top:30px}
+.sub-l{margin:0 0 12px;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-bottom:8px;border-bottom:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px 28px}
+.grid2>*{min-width:0}
+.rows{display:grid;gap:12px;align-content:start}
+.q{display:flex;flex-direction:column;gap:6px;min-width:0}
+.qt{font-size:13px;font-weight:500;color:var(--muted)}
+.note{margin:12px 0 0;font-size:13px;color:var(--muted);max-width:70ch}
+.note b{color:var(--fg)}
+.lead-in{margin:0 0 14px;color:var(--muted);max-width:70ch}
+.fld{width:100%;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14.5px;min-width:0}
+.fld::placeholder{color:var(--muted);opacity:.7}
+.fld:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.area{min-height:88px;resize:vertical;line-height:1.5}
+.cur{position:relative}
+.cur::before{content:'R$';position:absolute;left:12px;top:50%;transform:translateY(-50%);font:500 12px var(--mono);color:var(--muted);pointer-events:none}
+.cur .fld{padding-left:38px;font-variant-numeric:tabular-nums}
+.readout{background:var(--surface2);border-radius:10px;padding:12px 16px;margin-top:14px;font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.readout ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.readout b{font-variant-numeric:tabular-nums}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table.md{border-collapse:collapse;width:100%;min-width:640px;font-size:13.5px}
+table.md th,table.md td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.md thead th{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+table.md tbody th{font-weight:500}
+table.md tfoot th,table.md tfoot td{border-bottom:0;font-weight:700;font-variant-numeric:tabular-nums}
+table.md td.lead{color:var(--accent)}
+table.md select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;color:var(--fg)}
+.scale{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.scale b{font-size:14px;font-weight:600}
+.scale small{display:block;color:var(--muted);font-size:12.5px}
+.segs{display:flex;gap:6px}
+.seg{position:relative;display:block}
+.seg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.seg span{display:grid;place-items:center;width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font:500 13px var(--mono);color:var(--muted)}
+.seg input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.score-box{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-top:18px}
+.score-box .sv{font-size:44px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.score-box .den{font-size:16px;color:var(--muted);font-weight:500}
+.score-bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:10px;max-width:420px}
+.score-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.callout{margin-top:30px;border:1px dashed var(--line2);border-radius:10px;padding:16px 18px}
+.callout .cf{font:500 12.5px/1.6 var(--mono);margin:8px 0;letter-spacing:.02em}
+.callout p{margin:0;color:var(--muted)}
+.chain{display:grid;gap:6px}
+.chain-node{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.chain-arw{text-align:center;color:var(--muted);font-family:var(--mono)}
+.node-l{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.node-q{font-size:13px;color:var(--muted)}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
+.flow-node{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.flow-node .area{min-height:104px;background:var(--bg)}
+.chks{display:grid;gap:8px}
+.chk{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px}
+.chk input{margin-top:3px;width:16px;height:16px;accent-color:var(--fill);flex:none}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{position:relative}
+.pill input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.pill span{display:block;padding:8px 16px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font:500 13px var(--mono);color:var(--muted)}
+.pill input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.pill input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.binrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:14px;font-size:13.5px;font-weight:500;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;counter-reset:st}
+.step{counter-increment:st;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px;font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.step::before{content:counter(st);font:500 11px var(--mono);color:var(--accent)}
+.fillsent{font-size:clamp(16px,2.2vw,19px);line-height:2.5;margin:0;max-width:78ch}
+.slot{display:inline-block;vertical-align:baseline}
+.slot input{field-sizing:content;min-width:11ch;max-width:100%;background:transparent;border:0;border-bottom:2px solid var(--line2);padding:2px 4px;color:var(--accent-br);font-weight:600;border-radius:0}
+.slot input::placeholder{color:var(--muted);font-weight:400;opacity:.8}
+.slot input:focus-visible{outline:0;border-bottom-color:var(--accent)}
+.money{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:14px}
+.model-box{margin-top:18px;background:var(--surface);border:1px solid var(--line2);border-radius:16px;padding:clamp(18px,4vw,34px);display:flex;flex-direction:column;gap:26px}
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:14px}
+.cell{display:flex;flex-direction:column;gap:6px}
+.cell .cl{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.themath{font:400 13.5px/1.9 var(--mono);color:var(--muted)}
+.themath b{color:var(--fg);font-weight:700}
+.total{font:600 clamp(2.6rem,8vw,5rem)/1 var(--font);letter-spacing:-.05em;font-variant-numeric:tabular-nums;margin-top:8px;display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px}
+.total small{font-size:15px;letter-spacing:0;color:var(--muted);font-weight:500}
+.gauge{position:relative;height:12px;border-radius:6px;background:var(--line)}
+.gauge i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,var(--fill),var(--alt));width:0;transition:width .35s}
+.gauge-meta{display:flex;justify-content:space-between;font:500 11px var(--mono);color:var(--muted);margin-top:8px}
+.status-line{font-size:15px;font-weight:600;margin:0}
+.chart{overflow-x:auto;margin-top:6px}
+.chart svg{display:block;width:100%;min-width:560px;height:auto}
+.chart .t{fill:var(--muted);font:11px var(--mono)}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .goal{stroke:var(--fg);stroke-width:1.5;stroke-dasharray:5 4}
+.chart .lblbg{fill:var(--surface)}
+.chart .gt{fill:var(--fg);font:600 11px var(--mono)}
+.chart .b1{fill:var(--accent)} .chart .b2{fill:var(--alt)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.final{margin-top:64px;scroll-margin-top:calc(var(--hh) + 120px);border:1px solid var(--line2);border-radius:16px;padding:clamp(18px,4vw,34px);background:var(--surface2)}
+.final h2{margin:6px 0 20px;font:500 clamp(1.5rem,3vw,2rem)/1.15 var(--font);letter-spacing:-.035em}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.bp{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.bp p{margin:0;overflow-wrap:anywhere}
+.bp.empty p{color:var(--muted);font-size:13.5px}
+.bp.wide{grid-column:1/-1}
+.final-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:20px}
+.meta-goal{font:700 14px var(--mono);letter-spacing:.06em}
+#exportBox,#backupBox{margin-top:16px}
+#exportBox textarea,#backupBox textarea{min-height:180px;font:12.5px/1.6 var(--mono)}
+.bk-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.offer{margin-top:64px;scroll-margin-top:calc(var(--hh) + 120px)}
+.otlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:10px 28px;margin-top:14px}
+.ot-count{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px;font:600 14px var(--mono)}
+.princ{margin-top:64px;display:grid;gap:12px;max-width:70ch}
+.princ p{margin:0;padding-top:12px;border-top:1px solid var(--line)}
+.tag{font:500 12px var(--mono);letter-spacing:.08em;color:var(--muted);margin-top:8px}
+.foot{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.foot .arrow{font:500 12px var(--mono);letter-spacing:.06em;color:var(--fg)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:13.5px;font-weight:600;z-index:60;max-width:calc(100% - 32px)}
+
+/* ---------- responsivo ---------- */
+@media (max-width:1180px){
+  .dash{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .edition{display:none}
+  .top .div{display:none}
+}
+@media (max-width:960px){
+  :root{--hh:64px}
+  .logo .bsub{display:none}
+  .save{display:none}
+  .workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto}
+  .universe{order:-1;height:min(62vh,560px);min-height:420px}
+  .explorer{border-right:0;border-top:1px solid var(--line)}
+  .market-list{max-height:380px}
+  .panel{position:fixed;top:calc(env(safe-area-inset-top,0px) + var(--hh));width:100%;border-left:0;z-index:40}
+  .scene-title,.scene-note,.scene-coordinate{display:none}
+  .back{top:62px;left:16px}
+  .scene-topline{left:16px;right:16px;top:18px}
+  .scene-bottom{left:16px;right:16px;bottom:16px}
+  .interaction-hint{display:none}
+  .wb{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:20px 64px}
+  .chapter-rail{position:static;max-height:none;overflow:visible}
+  #nav{flex-direction:row;overflow-x:auto;padding-bottom:6px}
+  #nav a{white-space:nowrap;border:1px solid var(--line)}
+  .rail-actions{flex-direction:row;flex-wrap:wrap}
+  .rail-note{display:none}
+  .dash{position:static}
+  .sec,.final,.offer{scroll-margin-top:calc(var(--hh) + 16px)}
+}
+@media (max-width:640px){
+  .tab{padding:9px 12px;font-size:13.5px}
+  .tab i{display:none}
+  .tabs{margin-inline:0}
+  .p-illus{grid-template-columns:minmax(0,1fr)}
+  .flowlist li{grid-template-columns:minmax(0,1fr)}
+  .scale{grid-template-columns:minmax(0,1fr)}
+  .seg span{width:42px;height:42px}
+  .sec-head{grid-template-columns:minmax(0,1fr)}
+  .footer-note{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .panel{transition:none}
+  .track i,.mini i,.score-bar i,.gauge i{transition:none}
+}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="logo" aria-label="360 business acceleration">
+    <svg viewBox="0 0 34 40" fill="none" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="40" x2="34" y2="0"><stop offset="0" stop-color="#6d3fe0"/><stop offset="1" stop-color="#b9a2ff"/></linearGradient></defs><path d="M5 37C5 20 10 4 18 4c7 0 6 13 4 22-1.600 7.500-1 11 6 11" stroke="url(#lg)" stroke-width="5.500" stroke-linecap="round"/></svg>
+    <span class="b360">360</span><span class="bsub">business<br>acceleration</span>
+  </div>
+  <span class="div"></span>
+  <span class="edition">PLAYBOOK<b>AI-FIRST</b></span>
+  <nav class="tabs" aria-label="Etapas da experiência">
+    <button type="button" class="tab" id="tab-atlas" data-view="atlas" aria-current="page"><span>01</span>Explorar oportunidades</button>
+    <button type="button" class="tab" id="tab-work" data-view="work"><span>02</span>Construir meu negócio <i>↗</i></button>
+  </nav>
+  <div class="save"><i></i><span id="save-status">Seu plano começa aqui</span></div>
+</header>
+
+<main id="viewAtlas" aria-label="Explorar oportunidades">
+  <div class="workspace">
+    <aside class="explorer" aria-label="Explorar mercados">
+      <div class="intro">
+        <div class="eyebrow"><span class="sdot"></span>01 / Descubra sua oportunidade</div>
+        <h1>O seu próximo negócio está <span>neste universo.</span></h1>
+        <p>Explore dores reais. Encontre onde gerar valor.<br>Leve sua escolha para o playbook.</p>
+      </div>
+      <div class="explorer-heading"><h2>Explore os mercados</h2><span class="badge" id="market-total">19</span></div>
+      <label class="search-box" for="market-search"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10.500" cy="10.500" r="6.500"/><path d="m16 16 5 5"/></svg><input id="market-search" type="search" placeholder="Busque um mercado ou nicho" autocomplete="off"><kbd>/</kbd></label>
+      <div class="list-caption"><span id="list-caption">TODOS OS MERCADOS</span><span>NICHOS</span></div>
+      <nav id="legend-markets" class="market-list" aria-label="Mercados e nichos"></nav>
+      <div id="search-status" class="sr-only" role="status"></div>
+      <div class="explorer-foot"><span aria-hidden="true">◎</span><span id="explorer-foot-text">Explore um mercado para começar.</span></div>
+    </aside>
+
+    <section class="universe" id="universe" aria-label="Mapa tridimensional de mercados">
+      <div class="scene-grid" aria-hidden="true"></div>
+      <div id="scene-container"><canvas id="map" tabindex="0" aria-label="Universo 3D interativo de mercados. Arraste para girar. Use a lista ao lado para selecionar mercados pelo teclado."></canvas></div>
+      <div class="scene-topline">
+        <div class="breadcrumb"><span class="sdot"></span><button type="button" id="breadcrumb-home">Visão do universo</button><span class="cr" id="breadcrumb-current"></span></div>
+        <span class="scene-coordinate">A360 / EXPLORER.01</span>
+      </div>
+      <div class="scene-title" aria-hidden="true"><span>MAPA DE</span><strong>MERCADOS</strong></div>
+      <div class="scene-note"><i></i><span>Cada conexão,<br>uma nova oportunidade.</span></div>
+      <button type="button" id="back" class="back" hidden>← Voltar ao universo</button>
+      <div class="scene-bottom">
+        <div class="scene-key"><span><i></i>Mercado</span><span><i></i>Nicho</span><span><i></i>Conexão</span></div>
+        <div class="scene-controls">
+          <button type="button" id="zoom-out" aria-label="Diminuir zoom" title="Diminuir zoom">−</button>
+          <button type="button" id="reset-view" aria-label="Restaurar visão" title="Restaurar visão"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.500" aria-hidden="true"><path d="M4 9a8 8 0 1 1 0 6M4 4v5h5"/></svg></button>
+          <button type="button" id="zoom-in" aria-label="Aumentar zoom" title="Aumentar zoom">+</button>
+          <span></span>
+          <button type="button" id="toggle-motion" aria-label="Pausar rotação" aria-pressed="false" title="Pausar rotação">Ⅱ</button>
+        </div>
+      </div>
+      <div class="interaction-hint"><svg viewBox="0 0 18 22" width="13" height="17" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="1" width="12" height="19" rx="6"/><path d="M9 4v4"/></svg><span>Arraste para girar <b>·</b> Selecione para explorar</span></div>
+      <section id="panel" class="panel" aria-labelledby="detail-title" aria-hidden="true" inert>
+        <button type="button" id="panel-close" class="panel-close" aria-label="Fechar detalhes">✕</button>
+        <div id="panel-body" class="panel-body"></div>
+      </section>
+    </section>
+  </div>
+  <footer class="bottom-bar">
+    <div class="atlas-signature"><span class="sdot"></span>Oportunidades conectadas</div>
+    <div class="totals"><span><b id="total-markets">19</b>mercados</span><i></i><span><b id="total-niches">121</b>nichos para explorar</span></div>
+    <span class="footer-note">Da oportunidade ao seu negócio AI-First. ↗</span>
+  </footer>
+</main>
+
+<main id="viewWork" hidden aria-label="Construir meu negócio">
+  <div class="wb">
+    <aside class="chapter-rail" aria-label="Capítulos do playbook">
+      <div><span class="eyebrow">Do mercado à oferta</span><h2 style="margin-top:8px">Seu plano<br>de construção.</h2></div>
+      <div class="prog"><span id="progT" class="mono">0 de 8 etapas iniciadas</span><div class="track"><i id="progB"></i></div></div>
+      <nav id="nav" aria-label="Etapas"></nav>
+      <div class="rail-note"><b>Uma escolha vira direção.</b><p>Construa durante o encontro. Refine com dados do seu mercado.</p></div>
+      <div class="rail-actions">
+        <button type="button" class="btn ghost" data-go-atlas>◎ Voltar ao universo</button>
+        <button type="button" class="btn" id="btnCopy">Copiar blueprint</button>
+        <button type="button" class="btn ghost" id="btnBackup">Backup</button>
+        <button type="button" class="btn ghost" id="btnExample">Carregar exemplo</button>
+        <button type="button" class="btn ghost" id="btnReset">Começar do zero</button>
+      </div>
+    </aside>
+    <div class="workbook-content" id="wbRoot"></div>
+  </div>
+</main>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='playbook-ai-first-v2';
+var GOAL=100000;
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var num=function(v){var s=String(v==null?'':v).replace(/[^\d,]/g,'').replace(',','.');return parseFloat(s)||0};
+var BRL=function(n){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(n)};
+var cut=function(s,n){s=String(s||'').trim();return s.length>n?s.slice(0,n-1)+'…':s};
+var pad=function(n){return (n<10?'0':'')+n};
+var norm=function(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')};
+var axisLbl=function(v){return v===0?'R$ 0':'R$ '+(v/1000).toLocaleString('pt-BR')+' mil'};
+var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
+function hexA(h,a){var n=parseInt(h.slice(1),16);return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')'}
+
+/* =====================================================
+   DADOS DO UNIVERSO (conteúdo de referência, ajuste ao seu mercado)
+   ===================================================== */
+var GENERIC_AUTO='Follow-up, lembretes e registros rodam sem intervenção manual';
+function M(n,c,tag,th,ls,f,su,mr,v){return {n:n,c:c,tag:tag,th:th,ls:ls,f:f,su:su,mr:mr,v:v.map(function(x){return x.split('|')})}}
+var MK=[
+M('Educação','#a78bfa','Conhecimento que vira matrícula e matrícula que vira recorrência.','O atendimento conecta interesse, matrícula e permanência, usando o contexto do aluno para reduzir a evasão.',['Interessados sem resposta rápida','Aluno sem acompanhamento depois da matrícula','Ex-alunos que ninguém reativa'],['Dúvidas e leads de alunos em site, redes e WhatsApp','A IA qualifica objetivo, momento e capacidade de compra','Agenda a aula ou a conversa e acompanha a jornada','Mais matrículas e menos evasão'],8000,3500,[
+ 'Cursos online e infoprodutos|Alunos compram, não terminam e pedem reembolso.',
+ 'Escolas de idiomas|Leads de aula experimental esfriam antes da matrícula.',
+ 'Cursinhos e preparatórios|Evasão no meio do ano e pouco acompanhamento.',
+ 'Escolas particulares|Captação concentrada em poucos meses e funil manual.',
+ 'Faculdades e pós-graduação|Alto volume de leads e baixa taxa de matrícula.',
+ 'Reforço escolar e tutoria|Pais pedem retorno rápido e a agenda vive com buracos.',
+ 'Cursos profissionalizantes|Interessados pesquisam muito e decidem devagar.',
+ 'Escolas de música e artes|Alunos somem depois das primeiras aulas.']),
+M('Saúde e bem-estar','#5eead4','Agenda cheia e paciente acompanhado.','A IA atende, tria e confirma sem sobrecarregar a recepção, e mantém o paciente no tratamento.',['Lead sem resposta nos primeiros minutos','Faltas e cancelamentos sem reposição','Paciente sem retorno programado'],['Contatos de pacientes por anúncio, site e WhatsApp','A IA tria procedimento, urgência e orçamento','Agenda, confirma e remarca consultas e cuida do pós','Mais consultas realizadas e menos faltas'],12000,4500,[
+ 'Clínicas odontológicas|Leads de avaliação não são atendidos nos primeiros minutos.',
+ 'Clínicas médicas particulares|Faltas e agenda com horários vazios.',
+ 'Clínicas de fisioterapia|Pacientes abandonam o tratamento antes da alta.',
+ 'Psicólogos e terapeutas|Agenda instável e cancelamentos em cima da hora.',
+ 'Nutricionistas|O retorno das consultas cai depois do primeiro mês.',
+ 'Clínicas de dermatologia|Procedimentos de alto valor com orçamento sem resposta.',
+ 'Laboratórios e diagnóstico|Pedidos por WhatsApp sem triagem e resultados cobrados por telefone.',
+ 'Clínicas de oftalmologia|Pacientes de cirurgia somem depois da consulta.',
+ 'Home care e cuidadores|Famílias comparam prestadores e fecham com o primeiro que responde.',
+ 'Clínicas de reabilitação|Cada lead exige conversa longa e o time não dá conta.']),
+M('Beleza e estética','#f0abfc','Cadeira ocupada e cliente que volta.','Reservas, lembretes e reativação rodam sozinhos e mantêm a agenda cheia sem aumentar a equipe.',['Horários vazios na agenda','Cliente que não retorna','Pacote abandonado antes da última sessão'],['Pedidos de horário por Instagram e WhatsApp','A IA entende o serviço desejado e a disponibilidade','Agenda, lembra e reativa clientes inativos','Agenda ocupada e recompra recorrente'],6000,2500,[
+ 'Clínicas de estética avançada|Pacotes de alto valor sem acompanhamento do lead.',
+ 'Salões de beleza|Agenda com buracos e clientes que não voltam.',
+ 'Barbearias|Clientes fiéis sem programa de retorno.',
+ 'Studios de sobrancelha e cílios|Remarcações em cima da hora derrubam o faturamento.',
+ 'Clínicas de depilação a laser|Pacientes largam o pacote antes da última sessão.',
+ 'Spas e day spas|Pouca recorrência fora de datas comemorativas.']),
+M('Alimentação e agronegócio','#fb923c','Pedido recorrente em vez de pedido avulso.','Pedidos, cotações e reposição ficam organizados por IA, e a equipe vende e produz em vez de digitar.',['Pedidos perdidos por demora','Reposição que depende de alguém lembrar','Cotações sem acompanhamento'],['Pedidos e consultas por WhatsApp e telefone','A IA registra o pedido, identifica o cliente e prevê a reposição','Responde, envia cotação e agenda a reposição','Mais pedidos recorrentes e menos perda'],7000,3000,[
+ 'Restaurantes e bares|Reservas e pedidos dependem de atendimento manual.',
+ 'Delivery e dark kitchens|Dependência de marketplaces e pouca base própria.',
+ 'Padarias e confeitarias|Encomendas por mensagem sem controle de prazo.',
+ 'Distribuidores de alimentos|A reposição dos clientes depende do vendedor, sem previsão.',
+ 'Produtores rurais e cooperativas|Vendas e cotações acontecem por contato pessoal.',
+ 'Agroindústrias|Representantes comerciais sem acompanhamento do funil.']),
+M('Pets','#fbbf24','Tutor fiel e agenda previsível.','Lembretes de vacina, retorno e recompra fazem o tutor voltar sem depender da equipe lembrar.',['Vacinas e retornos esquecidos','Agenda irregular ao longo da semana','Tutor que some depois do primeiro serviço'],['Contatos de tutores e histórico do pet','A IA identifica a necessidade e o momento do ciclo do pet','Agenda, lembra e sugere o próximo serviço','Mais retornos e mais recorrência'],5000,2000,[
+ 'Clínicas veterinárias|Vacinas e retornos esquecidos pelos tutores.',
+ 'Pet shops e banho e tosa|Clientes sem recorrência e agenda irregular.',
+ 'Hotéis e creches para pets|Reservas perdidas na alta temporada por demora.',
+ 'Adestradores|Interessados somem antes de fechar o pacote.',
+ 'Distribuidoras de ração|A recompra depende de lembrar o cliente.',
+ 'Clínicas de castração e cirurgia|Orçamentos pedidos e nunca retomados.']),
+M('Imobiliário','#93c5fd','Lead de portal que vira visita.','O primeiro contato em minutos e a qualificação automática ligam o lead certo ao corretor certo.',['Lead de portal sem contato rápido','Visitas agendadas e não confirmadas','Base antiga de leads parada'],['Leads de portais, anúncios e WhatsApp','A IA qualifica perfil, orçamento e prazo de compra','Responde, agenda a visita e avisa o corretor','Mais visitas realizadas e mais propostas'],10000,4000,[
+ 'Imobiliárias de médio porte|Leads de portais chegam e ninguém qualifica rápido.',
+ 'Corretores autônomos|Atendimento fora do horário e leads esquecidos.',
+ 'Construtoras e incorporadoras|Lançamentos geram leads que esfriam em dias.',
+ 'Lançamentos e plantões de venda|O plantão atende poucos e o restante vai embora.',
+ 'Administradoras de condomínio|Chamados repetitivos consomem a equipe.',
+ 'Gestão de aluguel por temporada|Perguntas iguais de hóspedes o dia inteiro.',
+ 'Loteadoras|Visitas agendadas e não confirmadas.',
+ 'Imóveis comerciais e salas|Prospecção ativa manual e lenta.',
+ 'Avaliação e vistoria|Orçamentos solicitados sem retorno.']),
+M('Casa e construção','#fdba74','Orçamento respondido é obra fechada.','Quem responde o orçamento primeiro costuma fechar. A IA responde, coleta o briefing e acompanha a proposta.',['Orçamento sem resposta rápida','Proposta enviada e esquecida','Visita técnica não agendada'],['Pedidos de orçamento por site, anúncio e WhatsApp','A IA coleta o briefing e estima o escopo','Envia a proposta e faz o follow-up','Mais orçamentos respondidos e mais obras fechadas'],8000,3000,[
+ 'Arquitetura e interiores|Briefings longos e propostas sem acompanhamento.',
+ 'Construtoras de reformas|Orçamentos pedidos e esquecidos.',
+ 'Marcenaria sob medida|Visitas técnicas perdidas por falta de retorno.',
+ 'Lojas de materiais de construção|Cotações por WhatsApp sem resposta rápida.',
+ 'Energia solar|Propostas enviadas e sem follow-up.',
+ 'Piscinas e paisagismo|Demanda sazonal e orçamento lento.',
+ 'Esquadrias e vidraçaria|O cliente pede três orçamentos e fecha com o primeiro que responde.',
+ 'Climatização e ar-condicionado|Pico de demanda no verão sem capacidade de atendimento.']),
+M('Turismo e lazer','#fcd34d','Mais reservas diretas e menos comissão.','Atendimento imediato e proposta personalizada trazem a reserva direta, sem depender de plataformas.',['Consulta sem resposta fora do horário','Proposta sem acompanhamento','Cliente que não volta a viajar'],['Consultas de viajantes por site, redes e WhatsApp','A IA entende o perfil, o orçamento e as datas','Monta a proposta, envia e acompanha a decisão','Mais reservas diretas e mais recompra'],7000,3000,[
+ 'Agências de viagem|Consultas longas que não viram venda.',
+ 'Hotéis e pousadas|Reservas diretas perdidas para plataformas.',
+ 'Guias e passeios|Perguntas repetidas e reserva manual.',
+ 'Parques e atrações|Ingressos vendidos sem relacionamento posterior.',
+ 'Cruzeiros e pacotes|Ticket alto e ciclo de decisão longo.',
+ 'Intercâmbio|Famílias com muitas dúvidas e pouco acompanhamento.']),
+M('Automotivo','#f87171','Lead quente atendido antes do concorrente.','Leads de portais e anúncios recebem resposta imediata, e o cliente de oficina volta na hora certa.',['Lead de portal sem contato rápido','Revisão esquecida pelo cliente','Orçamento sem acompanhamento'],['Leads de portais, anúncios e WhatsApp','A IA qualifica o interesse e o prazo de compra ou serviço','Agenda visita, test drive ou revisão e faz o follow-up','Mais visitas, mais vendas e mais retorno à oficina'],9000,3500,[
+ 'Concessionárias e seminovos|Leads de portais sem contato rápido.',
+ 'Oficinas mecânicas|Revisões esquecidas e clientes sem retorno.',
+ 'Funilaria e pintura|Orçamentos demorados e sem acompanhamento.',
+ 'Estética e blindagem automotiva|Serviços de alto valor com lead frio.',
+ 'Locadoras de veículos|Cotações perdidas fora do horário comercial.',
+ 'Autopeças|Consultas de peça por mensagem sem resposta.']),
+M('Varejo e e-commerce','#f472b6','Cliente que compra de novo.','Atendimento, recuperação de carrinho e recompra automáticos aumentam o valor de cada cliente.',['Carrinho abandonado sem recuperação','Dúvidas sem resposta que travam a compra','Cliente sem recompra programada'],['Conversas de clientes, carrinhos e histórico de compras','A IA entende a dúvida e sugere o produto certo','Responde, recupera carrinhos e propõe a recompra','Mais vendas por cliente e menos abandono'],7000,3000,[
+ 'Lojas de roupas e moda|Carrinho abandonado e cliente sem recompra.',
+ 'E-commerces de nicho|O atendimento no WhatsApp não acompanha o volume.',
+ 'Joalherias|Ticket alto com decisão lenta.',
+ 'Óticas|Receitas vencem e o cliente nunca é chamado.',
+ 'Farmácias e manipulação|Recompra de uso contínuo sem lembrete.',
+ 'Móveis e decoração|Visitas à loja que não viram venda.',
+ 'Eletro e eletrônicos|Dúvidas técnicas travam a compra.']),
+M('Entretenimento','#e879f9','Audiência que vira comunidade e comunidade que vira receita.','Atenção é o ativo. IA transforma audiência dispersa em base própria e monetizável.',['Horário ocioso entre os picos','Audiência sem relacionamento','Ingressos e planos sem recorrência'],['Audiência, inscritos e frequentadores em vários canais','A IA identifica interesse, momento e propensão de compra','Convida, vende e mantém o relacionamento ativo','Mais adesão, mais ocupação e mais receita recorrente'],6000,2500,[
+ 'Academias e clubes|Horário ocioso o dia todo entre picos.',
+ 'Games|Comunidade engajada sem monetização estruturada.',
+ 'Conteúdo|Audiência grande e receita dependente de poucas fontes.',
+ 'Eventos|Ingressos vendidos tarde e participantes sem relacionamento depois.']),
+M('Logística e transporte','#4ade80','Cotação respondida e entrega sob controle.','Cotações, rastreio e ocorrências deixam de ser telefonema e viram fluxo automático.',['Cotação lenta','Rastreio por telefone','Ocorrência sem aviso proativo'],['Pedidos de cotação, cargas e ocorrências','A IA calcula, classifica e prioriza cada demanda','Responde, atualiza o cliente e aciona o time','Mais cotações fechadas e menos chamados'],12000,5000,[
+ 'Transportadoras regionais|Cotações lentas e rastreio por telefone.',
+ 'Fretes e cargas|Cargas ociosas por falta de casamento rápido.',
+ 'Last mile e entregas|Reclamações de entrega que sobrecarregam o suporte.']),
+M('Indústria e manufatura','#818cf8','Pedido sem planilha e orçamento sem espera.','Orçamentos e pedidos recorrentes saem das planilhas e passam a rodar em fluxo com IA.',['Orçamento demorado','Pedidos presos em planilhas','Representantes sem visibilidade'],['Pedidos, especificações e solicitações de orçamento','A IA lê a especificação e monta a proposta','Envia, acompanha e atualiza o CRM','Ciclo de venda menor e mais pedidos recorrentes'],15000,6000,[
+ 'Indústrias de médio porte|Pedidos e orçamentos presos em planilhas.',
+ 'Fornecedores B2B|Representantes sem visibilidade do funil.',
+ 'Gráficas e personalizados|Orçamentos sob medida que demoram dias.']),
+M('Fitness e performance','#a3e635','Aluno que fica e aluno que indica.','Contato proativo e acompanhamento automático reduzem a evasão e enchem os horários vagos.',['Aula experimental sem conversão','Aluno que some depois de semanas','Horários vagos fora do pico'],['Leads, alunos e frequência de treino','A IA identifica risco de abandono e interesse em planos','Convida, acompanha e reativa o aluno','Mais matrículas e mais permanência'],6000,2500,[
+ 'Academias de musculação|Alunos sumindo depois do terceiro mês.',
+ 'Studios de pilates|Aula experimental sem conversão em plano.',
+ 'Crossfit e boxes|Matrículas dependem de indicação.',
+ 'Personal trainers|Agenda cheia de remarcações.',
+ 'Nutrição esportiva|Planos sem acompanhamento semanal.',
+ 'Clubes de corrida|Assessorias que perdem atletas por falta de contato.',
+ 'Artes marciais|Alunos novos desistem na fase inicial.',
+ 'Suplementos|A recompra depende do cliente lembrar.']),
+M('Finanças','#fb7185','Renovação garantida e lead bem qualificado.','Qualificação, cotação e renovação automáticas poupam o time para as conversas que realmente fecham.',['Renovação perdida','Lead qualificado misturado com curioso','Cotação sem retorno'],['Leads, apólices, simulações e dados do cliente','A IA qualifica perfil e identifica o momento da renovação','Cota, acompanha e agenda a conversa com o especialista','Mais renovações e mais propostas fechadas'],12000,5000,[
+ 'Corretoras de seguros|Renovações perdidas e cotações sem retorno.',
+ 'Consultoria financeira|Leads qualificados misturados com curiosos.',
+ 'Crédito e consórcio|Muitas simulações e poucas propostas fechadas.',
+ 'Cobrança e recuperação|Contato manual com devedores e baixa taxa de acordo.',
+ 'Planejamento patrimonial|Ciclo longo e pouca nutrição de leads.']),
+M('Jurídico','#c4b5fd','Caso viável identificado desde o primeiro contato.','A triagem automática separa caso viável de curioso e leva ao advogado só o que importa.',['Triagem manual e demorada','Lead sem resposta fora do horário','Proposta sem acompanhamento'],['Contatos de clientes em potencial e documentos','A IA faz a triagem inicial e avalia a viabilidade','Coleta documentos, agenda a consulta e acompanha','Mais casos viáveis e menos tempo de triagem'],12000,4500,[
+ 'Advocacia previdenciária|A triagem de casos é manual e demorada.',
+ 'Advocacia trabalhista|Leads chegam em massa e poucos são viáveis.',
+ 'Advocacia de família|Primeiro contato sensível sem resposta rápida.',
+ 'Advocacia empresarial|Propostas longas sem acompanhamento.',
+ 'Advocacia criminal|Urgência alta e atendimento fora do horário.',
+ 'Direito do consumidor|O volume de casos exige triagem automática.',
+ 'Registro de marcas e patentes|Orçamentos solicitados e esquecidos.']),
+M('Serviços profissionais','#60a5fa','Proposta rápida e cliente informado.','Propostas, status e relatórios saem do manual e o cliente percebe valor em cada etapa.',['Proposta lenta','Cliente sem informação de status','Funil dependente de indicação'],['Pedidos de proposta, briefings e demandas dos clientes','A IA organiza o briefing e prepara a proposta','Envia, acompanha e atualiza o cliente','Mais propostas aceitas e menos cancelamentos'],9000,3500,[
+ 'Escritórios de contabilidade|Clientes novos esperam dias por proposta.',
+ 'Consultorias de gestão|Funil dependente de indicação.',
+ 'Agências de marketing|Relatórios manuais e churn por falta de prova de resultado.',
+ 'Coaching e mentoria|Aplicações sem triagem e calls improdutivas.',
+ 'Engenharia e projetos|Propostas técnicas lentas.',
+ 'Recrutamento e seleção|Triagem de currículos manual.',
+ 'Tradução e idiomas|Orçamentos por arquivo sem resposta rápida.',
+ 'Segurança do trabalho|Renovações de contrato esquecidas.',
+ 'Despachantes e regularização|Clientes pedem status o tempo todo.']),
+M('Tecnologia e software','#38bdf8','Trial que ativa e cliente que fica.','Onboarding, suporte e ativação guiados por IA convertem trial em cliente e reduzem churn.',['Trial que não ativa','Suporte repetitivo','Churn sem alerta'],['Uso do produto, tickets e dados de cadastro','A IA identifica quem não ativou e quem está em risco','Orienta, responde e aciona o time certo','Mais ativação e menos churn'],12000,5000,[
+ 'SaaS B2B|Trials que não ativam.',
+ 'Agências de software|Briefings vagos e propostas lentas.',
+ 'Suporte e help desk|Perguntas repetidas sobre o mesmo problema.',
+ 'Startups em early stage|Funil de vendas sem processo.',
+ 'Provedores de internet|Cancelamentos e suporte básico sobrecarregam a equipe.',
+ 'Hospedagem e cloud|Onboarding técnico lento.']),
+M('Outros','#cbd5e1','Relacionamento em escala.','Organizações com muitos contatos ganham atendimento individual sem aumentar a equipe.',['Contato sem acompanhamento','Atendimento repetitivo','Processos diferentes em cada unidade'],['Mensagens, cadastros e solicitações recorrentes','A IA entende o pedido e o histórico de cada pessoa','Responde, encaminha e mantém o relacionamento','Mais engajamento e menos carga manual'],6000,2500,[
+ 'Igrejas e comunidades|Comunidade sem acompanhamento individual.',
+ 'ONGs e associações|Doadores e voluntários sem relacionamento contínuo.',
+ 'Franquias|Franqueados com leads sem padrão de atendimento.',
+ 'Cooperativas e sindicatos|Associados sem atendimento ágil.'])
+];
+var TOTAL_NICHES=MK.reduce(function(a,m){return a+m.v.length},0);
+
+/* =====================================================
+   WORKBOOK: conteúdo fixo
+   ===================================================== */
+var MDC=['Tamanho do mercado','Crescimento do setor','Saúde financeira das empresas','Valor do cliente (ticket)','Custo do problema','Acesso aos decisores'];
+var NS=[['Demanda','As pessoas já procuram e pagam por isso?'],['Dor','O problema dói todo mês?'],['Capacidade de pagamento','A empresa tem caixa para investir?'],['Facilidade de aquisição','Dá para chegar ao decisor com custo baixo?'],['Potencial de valor','Quanto vale resolver o problema?'],['Acesso ao decisor','O dono ou gestor atende e decide?'],['Recorrência','A necessidade volta todo mês?'],['Aderência à IA','A IA resolve melhor que o processo atual?'],['Concorrência','Poucos já oferecem algo parecido?'],['Ciclo de venda','A decisão de compra é rápida?']];
+var TS=['CRM / System of Record','AI / Agent','Automation','Data / Knowledge','Integrations','Reporting'];
+var CA=['Estrutura do CRM','Workflows','Automações','Prompt Master','AI Agent','Knowledge Base','Templates','Integrações-base','Dashboard / Reporting','SOPs / Checklists'];
+var DEPLOY=['Duplicar a estrutura-base','Inserir dados e contexto do cliente','Conectar contas e fontes de dados','Configurar variáveis específicas','Validar o funcionamento','Liberar a infraestrutura'];
+var OT=['O nicho tem demanda comprovada e empresas com caixa para investir.','O problema é caro e o cliente já sente a perda.','Descrevo o problema em uma frase que o decisor reconhece.','Existe dado, benchmark ou caso que prova o gap.','A IA tem um papel específico e elimina um gargalo real.','O resultado é de negócio (receita, leads, vendas), não uma tarefa.','O mecanismo tem nome próprio.','A solução não se compara com "uma automação" ou uma ferramenta.','A promessa cabe em uma frase com nicho, resultado e mecanismo.','Os entregáveis principais são cinco ou menos.','A infraestrutura é construída uma vez e implantada muitas vezes.','Pelo menos 60% do trabalho é padronizado.','O setup premium cobre o custo de implantação.','A mensalidade mantém margem bruta saudável.','O ROI do cliente é óbvio com poucos resultados.','Sei quem decide a compra e como chegar nessa pessoa.','O CAC-alvo cabe no caixa do primeiro mês.','A conta de R$100K/mês fecha com um número realista de clientes.','Consigo entregar o primeiro cliente sem depender de herói.'];
+
+var EX={
+  atlas_market:'Saúde e bem-estar',atlas_niche:'Clínicas odontológicas',
+  m1:'Clínicas de implante e estética dental',m2:'Advogados previdenciários',m3:'Escritórios de contabilidade',m4:'Clínicas de estética avançada',m5:'Imobiliárias de médio porte',
+  mg1:'Leads de tráfego pago esfriam antes do primeiro contato da recepção',mg2:'Meta Ads e Instagram, com atendimento por WhatsApp',mg3:'Avaliações gratuitas agendadas e não confirmadas; faltas sem reagendamento',mg4:'Triagem de leads, follow-up e confirmação de consultas',mg5:'O lead responde fora do horário e ninguém retoma o contato',mg6:'Recepção sobrecarregada e resposta que demora horas',mg7:'Um implante fechado vale R$ 8 a 15 mil. Cada avaliação perdida é caixa que não volta.',
+  n_nicho:'Clínicas de implante e estética dental',n_icp:'Dono de clínica com 3+ cadeiras, faturamento de R$ 150 a 600 mil/mês, que já investe em tráfego pago',n_pq1:'Ticket alto, margem boa e dono que decide sozinho',n_pq2:'O custo do lead está subindo e perder lead ficou caro demais',
+  g_p1:'Leads de implante não são atendidos nos primeiros minutos',g_p2:'Entre o clique no anúncio e a primeira conversa no WhatsApp',g_p3:'O investimento em mídia e a chance de fechar um tratamento de alto valor',g_p4:'A recepção responde quando consegue e usa planilha de follow-up',g_p5:'Depende de pessoa, horário e memória',
+  g_ow1:'A recepção atende, anota e tenta retomar depois',g_ow2:'Resposta lenta, follow-up irregular e sem registro confiável',g_ow3:'Custo por avaliação agendada alto e faltas não recuperadas',
+  g_c1:'O lead espera e procura outra clínica',g_c2:'O custo por avaliação sobe e a equipe perde a confiança no tráfego',g_c3:'O dono corta mídia e o crescimento da clínica trava',
+  g_pv1:'Benchmark de tempo de resposta a leads (inserir fonte)',g_pv2:'Clínica com 40 leads por mês que perde metade sem contato (ilustrativo)',g_pv3:'Conversas com donos de clínica apontam a recepção como gargalo (ilustrativo)',
+  tf1:'Leads do Meta Ads, Instagram e WhatsApp',tf2:'A IA qualifica interesse, procedimento, urgência e orçamento',tf3:'Follow-up em 5 min, 24h e 3 dias, com reativação de leads frios',tf4:'Agenda a avaliação e avisa a recepção',tf5:'Mais avaliações agendadas e menos faltas',
+  ai1:'Atende na hora e qualifica. Elimina o gargalo da recepção.',ai2:'Triagem, follow-up e confirmação de consultas',ai3:'Responde em minutos, 24h por dia, e registra tudo',ai_val:'Sim',ai_case:'Não',
+  ts1:true,ts2:true,ts3:true,ts4:true,ts5:true,
+  ca1:true,ca2:true,ca3:true,ca4:true,ca5:true,ca6:true,ca7:true,ca8:true,ca_o:'Roteiro de onboarding do cliente',
+  cv1:'Procedimentos e preços',cv2:'Tom de voz da clínica',cv3:'Agenda e horários',cv4:'Contas de anúncios e WhatsApp',pt:'80%',pt_q:'A integração com cada sistema de agenda varia',
+  nm1:'Clinic Response OS',nm2:'Protocolo 5 Minutos',nm3:'Agenda Cheia Engine',nm4:'Recepção 24h',nm5:'Lead-to-Chair System',nm_final:'Lead-to-Chair System',
+  wd1:'Trata o lead como paciente em potencial, da primeira mensagem até a cadeira',wd2:'Une qualificação, agenda e recuperação de faltas em um sistema só',wd3:'O cliente compra avaliações agendadas, não um chatbot',
+  ol1:'Lead-to-Chair System',ol2:'agentes de IA no WhatsApp',ol3:'leads de anúncio',ol4:'avaliações agendadas e confirmadas',ol5:'recepção sobrecarregada e follow-up manual',
+  pr1:'clínicas de implante e estética dental',pr2:'transformar mais leads em avaliações agendadas',pr3:'Lead-to-Chair System',pr4:'follow-up manual da recepção',
+  ve1:'Leads que esfriam sem resposta',ve2:'Mais avaliações agendadas e menos faltas',ve3:'Um implante a mais por mês já paga o investimento',ve4:'O custo de mídia está subindo e cada lead vale mais',
+  wg1:'Agente de IA no WhatsApp com a voz da clínica',wg2:'Fluxo de follow-up e reativação',wg3:'Agenda e confirmação automáticas',wg4:'Painel de avaliações e comparecimento',
+  mo_setup:'12000',mo_ret:'4500',mo_ful:'900',mo_mrg:'80',mo_cac:'3000',
+  roi1:'Um paciente de implante paga o setup',roi2:'10000',roi3:'30000',roi4:'Com um único tratamento recuperado, o cliente cobre o setup e vários meses de mensalidade.',
+  k_setup:'12000',k_mrr:'4500',k_novos:'3',k_rec:'10',k_churn:'5'
+};
+[[5,4,4,5,5,4],[4,3,3,4,4,3],[5,3,3,2,3,3],[4,5,3,4,4,4],[4,2,3,4,3,3]].forEach(function(col,ni){col.forEach(function(v,r){EX['md'+r+'_'+(ni+1)]=String(v)})});
+[5,5,4,4,5,4,4,4,3,3].forEach(function(v,i){EX['ns'+i]=String(v)});
+for(var ei=0;ei<14;ei++)EX['ot'+ei]=true;
+
+/* ---------- estado ---------- */
+var S=null;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+if(!S||typeof S!=='object'||Array.isArray(S))S={};
+var saveT=null;
+function hasWork(){return Object.keys(S).some(function(k){return k.indexOf('__')!==0&&S[k]!==''&&S[k]!==false&&S[k]!==undefined})}
+function status(){var el=$('#save-status');if(el)el.textContent=hasWork()?'Salvo neste navegador':'Seu plano começa aqui'}
+function save(){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}status()},200)}
+
+/* ---------- construtores de campo ---------- */
+var CH=[],cur=null;
+function chapter(id,title){cur={id:id,title:title,keys:[]};CH.push(cur)}
+function reg(k){if(cur)cur.keys.push(k)}
+function inp(k,o){o=o||{};reg(k);return '<input class="fld" id="f-'+k+'" data-k="'+k+'" type="text" autocomplete="off" value="'+esc(S[k])+'"'+(o.ph?' placeholder="'+esc(o.ph)+'"':'')+(o.money||o.num?' inputmode="numeric"':'')+'>'}
+function area(k){reg(k);return '<textarea class="fld area" id="f-'+k+'" data-k="'+k+'">'+esc(S[k])+'</textarea>'}
+function field(k,label,o){o=o||{};return '<div class="q"><label class="qt" for="f-'+k+'">'+label+'</label>'+(o.area?area(k):o.money?'<div class="cur">'+inp(k,o)+'</div>':inp(k,o))+'</div>'}
+function seg(k,label){reg(k);var h='<div class="segs" role="radiogroup" aria-label="'+esc(label)+'">';for(var i=1;i<=5;i++)h+='<label class="seg"><input type="radio" name="'+k+'" data-k="'+k+'" value="'+i+'"'+(String(S[k])===String(i)?' checked':'')+'><span>'+i+'</span></label>';return h+'</div>'}
+function sel(k,label){reg(k);var h='<select id="f-'+k+'" data-k="'+k+'" aria-label="'+esc(label)+'"><option value="">–</option>';for(var i=1;i<=5;i++)h+='<option value="'+i+'"'+(String(S[k])===String(i)?' selected':'')+'>'+i+'</option>';return h+'</select>'}
+function pills(k,opts){reg(k);return '<div class="pills" role="radiogroup">'+opts.map(function(o){return '<label class="pill"><input type="radio" name="'+k+'" data-k="'+k+'" value="'+esc(o)+'"'+(S[k]===o?' checked':'')+'><span>'+esc(o)+'</span></label>'}).join('')+'</div>'}
+function chk(k,label){reg(k);return '<label class="chk"><input type="checkbox" id="f-'+k+'" data-k="'+k+'"'+(S[k]===true?' checked':'')+'><span>'+esc(label)+'</span></label>'}
+function slot(k,ph){reg(k);return '<span class="slot"><input id="f-'+k+'" data-k="'+k+'" type="text" autocomplete="off" aria-label="'+esc(ph)+'" placeholder="'+esc(ph)+'" value="'+esc(S[k])+'"></span>'}
+function sec(id,n,title,desc,body){return '<section class="sec" id="etapa-'+id+'" data-ch="'+id+'"><header class="sec-head"><span class="sec-n">'+n+'</span><div><h2>'+title+'</h2><p>'+desc+'</p></div></header>'+body+'</section>'}
+function sub(label,body){return '<div class="sub"><h3 class="sub-l">'+label+'</h3>'+body+'</div>'}
+function rowsOf(a){return '<div class="rows">'+a.join('')+'</div>'}
+
+function build(){
+  CH=[];cur=null;var h='';
+  h+='<div id="banner" class="banner" hidden><p><b>Exemplo preenchido.</b> Clínicas de implante e estética dental, com números e casos fictícios para mostrar como o playbook funciona. Edite à vontade ou comece o seu.</p><button type="button" class="btn" id="btnBanner">Começar do zero</button></div>';
+  h+='<header class="hero"><span class="eyebrow">Seu negócio AI-First · do mercado à oferta</span><h1>Uma oportunidade.<br><span>Um negócio para construir.</span></h1><p class="lead">Transforme sua escolha em um plano: entenda o problema, desenhe a solução e construa uma oferta que faça sentido para o cliente.</p><div class="flow-line" aria-label="Sequência do playbook"><b>Pesquisa</b><span>→</span><b>Nicho</b><span>→</span><b>Gap</b><span>→</span><b>Infraestrutura</b><span>→</span><b>Mecanismo</b><span>→</span><b>Oferta</b></div><div class="principle"><span class="eyebrow">Princípio central</span><p>Você não começa pela IA. Você começa por um mercado valioso, encontra um problema caro e constrói uma infraestrutura de IA capaz de fechar esse gap.</p></div></header>';
+  h+='<section class="bridge" aria-label="Oportunidade escolhida"><div><span class="eyebrow">Seu ponto de partida</span><h2 id="selNiche">Qual oportunidade você quer explorar?</h2><p id="selMarket">Escolha um nicho no universo 3D ou comece preenchendo o playbook.</p></div><button type="button" class="btn ghost" data-go-atlas>Explorar mercados ↗</button></section><p id="selFeedback" class="feedback" role="status"></p>';
+  h+='<div class="dash" aria-label="Indicadores do seu playbook"><div class="stat"><span class="eyebrow">Niche Score</span><span class="v" id="dNiche">—</span><span class="s" id="dNicheSub">Avalie 10 critérios</span><div class="mini"><i id="dNicheBar"></i></div></div><div class="stat"><span class="eyebrow">Padronização</span><span class="v" id="dProd">—</span><span class="s" id="dProdSub">Defina o que se constrói uma vez</span></div><div class="stat"><span class="eyebrow">Offer Test</span><span class="v" id="dOffer">0<small> / 19</small></span><span class="s" id="dOfferSub">Marque cada item com honestidade</span></div><div class="stat"><span class="eyebrow">Receita mensal do modelo</span><span class="v" id="dModel">—</span><span class="s" id="dModelSub">Preencha a etapa 08</span><div class="mini"><i id="dModelBar"></i></div></div></div>';
+
+  chapter('pesquisa','Pesquisa de mercado');
+  var tbl='<div class="tblwrap"><table class="md"><thead><tr><th scope="col">Critério</th>'+[1,2,3,4,5].map(function(n){return '<th scope="col" id="mdh'+n+'">Nicho 0'+n+'</th>'}).join('')+'</tr></thead><tbody>'+MDC.map(function(c,r){return '<tr><th scope="row">'+c+'</th>'+[1,2,3,4,5].map(function(n){return '<td>'+sel('md'+r+'_'+n,c+', nicho '+n)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody><tfoot><tr><th scope="row">Total (de 30)</th>'+[1,2,3,4,5].map(function(n){return '<td id="mdt'+n+'">–</td>'}).join('')+'</tr></tfoot></table></div>';
+  h+=sec('pesquisa','01','Pesquisa de Mercado','Encontre mercados em que resolver um único problema possa gerar valor desproporcional.',
+    sub('A · Mercados pesquisados','<div class="grid2">'+rowsOf([inp('m1',{ph:'Nicho ou subnicho 01'}),inp('m2',{ph:'Nicho ou subnicho 02'}),inp('m3',{ph:'Nicho ou subnicho 03'})])+rowsOf([inp('m4',{ph:'Nicho ou subnicho 04'}),inp('m5',{ph:'Nicho ou subnicho 05'})])+'</div><p class="note"><b>Filtro:</b> priorize prestadores de serviços locais ou online com capacidade real de investir em crescimento.</p>')+
+    sub('B · Market Data: nota de 1 a 5 em cada critério',tbl+'<div class="readout"><span id="mdLead"></span></div><p class="note"><b>Filtro GrowthAI:</b> priorize mercados amplos, em crescimento, com empresas financeiramente saudáveis, clientes de alto valor, problemas caros e fácil acesso aos decisores.</p>')+
+    sub('C · Money Gap','<p class="lead-in" id="mgLead"></p><div class="grid2">'+rowsOf([field('mg1','Onde o dinheiro está sendo perdido?'),field('mg2','Como essas empresas geram clientes hoje?'),field('mg3','Onde existe perda de oportunidade?'),field('mg4','O que ainda depende de processos manuais?')])+rowsOf([field('mg5','Onde leads, vendas ou receita escapam?'),field('mg6','Qual problema aparece repetidamente?'),field('mg7','Qual desses problemas parece mais caro para o negócio?',{area:true})])+'</div>'));
+
+  chapter('nicho','Escolha do nicho');
+  h+=sec('nicho','02','Escolha do Nicho','Não escolha pelo que parece interessante. Escolha pela combinação de oportunidade, dor e economics.',
+    sub('A · Niche Score: avalie cada critério de 1 a 5',NS.map(function(c,i){return '<div class="scale"><div><b>'+c[0]+'</b><small>'+c[1]+'</small></div>'+seg('ns'+i,c[0])+'</div>'}).join('')+'<div class="score-box"><span class="sv"><span id="nicheScore">0</span> <span class="den">/ 50</span></span><span id="nicheVerdict"></span></div><div class="score-bar"><i id="nicheBar"></i></div>')+
+    sub('B · Decisão','<div class="grid2">'+field('n_nicho','Nicho escolhido')+field('n_icp','ICP: quem exatamente compra dentro desse nicho?')+field('n_pq1','Por que este mercado?')+field('n_pq2','Por que agora?')+'</div>')+
+    '<div class="callout"><span class="eyebrow">The Niche Rule</span><div class="cf">DEMANDA × DOR × CAPACIDADE DE PAGAMENTO × FACILIDADE DE AQUISIÇÃO × POTENCIAL DE VALOR</div><p>O melhor nicho não é necessariamente o mais popular. É aquele em que essas variáveis se alinham melhor.</p></div>');
+
+  chapter('gap','Gap analysis');
+  h+=sec('gap','03','Gap Analysis','Antes de construir a solução, entenda profundamente o que precisa ser corrigido.',
+    '<div class="grid2">'+
+    sub('A · Problema Nº 1',rowsOf([field('g_p1','Qual problema vamos atacar?'),field('g_p2','Em que momento da jornada ele acontece?'),field('g_p3','O que a empresa perde quando isso acontece?'),field('g_p4','Como o mercado tenta resolver isso hoje?'),field('g_p5','Por que o processo atual é insuficiente?')]))+
+    sub('B · The Old Way',rowsOf([field('g_ow1','Método atual: o que fazem hoje?'),field('g_ow2','Ineficiência: por que isso não funciona bem?'),field('g_ow3','Impacto financeiro: onde aparece a perda?')]))+'</div>'+
+    '<div class="grid2">'+
+    sub('C · Consequence Chain','<div class="chain"><div class="chain-node"><span class="node-l">1ª ordem</span><label class="node-q" for="f-g_c1">O que acontece imediatamente?</label>'+inp('g_c1')+'</div><div class="chain-arw" aria-hidden="true">↓</div><div class="chain-node"><span class="node-l">2ª ordem</span><label class="node-q" for="f-g_c2">O que esse problema passa a causar?</label>'+inp('g_c2')+'</div><div class="chain-arw" aria-hidden="true">↓</div><div class="chain-node"><span class="node-l">3ª ordem</span><label class="node-q" for="f-g_c3">Qual é a consequência final para o negócio?</label>'+inp('g_c3')+'</div></div>')+
+    sub('D · Prova',rowsOf([field('g_pv1','Dado / benchmark'),field('g_pv2','Caso / exemplo'),field('g_pv3','Evidência encontrada no mercado',{area:true})]))+'</div>');
+
+  chapter('infra','Infraestrutura de IA');
+  var fl=[['tf1','Input','O que entra no sistema?'],['tf2','Intelligence','O que a IA identifica, interpreta ou decide?'],['tf3','Automation','O que acontece sem intervenção manual?'],['tf4','Action','Qual ação é executada?'],['tf5','Output','Qual resultado de negócio é produzido?']];
+  h+=sec('infra','04','AI Growth Infrastructure','Converta o gap em uma infraestrutura que produza um resultado de negócio.',
+    sub('A · Transformation Flow','<div class="flow">'+fl.map(function(f){return '<div class="flow-node"><span class="node-l">'+f[1]+'</span><label class="node-q" for="f-'+f[0]+'">'+f[2]+'</label>'+area(f[0])+'</div>'}).join('')+'</div>')+
+    '<div class="grid2">'+
+    sub('B · AI Use Case',rowsOf([field('ai1','Qual é o papel específico da IA? Qual gargalo ela elimina?'),field('ai2','Qual ação antes manual passa a ser automatizada?'),field('ai3','Por que esse mecanismo é superior ao processo atual?')])+'<div class="binrow">Proposta de valor já validada?'+pills('ai_val',['Sim','Não'])+'</div><div class="binrow">Existe case ou evidência?'+pills('ai_case',['Sim','Não'])+'</div>')+
+    sub('C · Tech Stack','<div class="chks">'+TS.map(function(t,i){return chk('ts'+(i+1),t)}).join('')+'</div><div class="readout"><span id="stackCov"></span></div>')+'</div>');
+
+  chapter('produtizacao','Produtização');
+  h+=sec('produtizacao','05','Produtização','Build once. Deploy many. Comunica escala, não velocidade.',
+    '<div class="grid2">'+
+    sub('A · Core Assets: o que será construído uma única vez?','<div class="chks">'+CA.map(function(t,i){return chk('ca'+(i+1),t)}).join('')+'</div><div style="margin-top:12px">'+field('ca_o','Outro')+'</div><div class="readout"><span id="assetsCov"></span></div>')+
+    sub('B · Client Variables: o que muda de cliente para cliente?',rowsOf([inp('cv1',{ph:'Variável 01'}),inp('cv2',{ph:'Variável 02'}),inp('cv3',{ph:'Variável 03'}),inp('cv4',{ph:'Variável 04'})]))+'</div>'+
+    sub('C · Deployment Logic','<div class="steps">'+DEPLOY.map(function(d){return '<div class="step"><span>'+d+'</span></div>'}).join('')+'</div>')+
+    sub('Productization Test: quanto pode ser padronizado?',pills('pt',['20%','40%','60%','80%','90%+'])+'<div style="margin-top:14px">'+field('pt_q','O que ainda impede essa infraestrutura de ser altamente replicável?')+'</div>'));
+
+  chapter('mecanismo','Mecanismo único');
+  h+=sec('mecanismo','06','Mecanismo Único','Não venda ferramentas. Dê uma identidade própria à transformação.',
+    '<div class="grid2">'+
+    sub('A · Name the Mechanism',rowsOf([inp('nm1',{ph:'Ideia 01'}),inp('nm2',{ph:'Ideia 02'}),inp('nm3',{ph:'Ideia 03'}),inp('nm4',{ph:'Ideia 04'}),inp('nm5',{ph:'Ideia 05'})]))+
+    sub('B · Nome escolhido',field('nm_final','Nome do mecanismo (™)')+'<p class="note mono">SYSTEM · ENGINE · PROTOCOL · OS · METHOD · FRAMEWORK</p><h3 class="sub-l" style="margin-top:22px">C · Why it\'s different</h3>'+rowsOf([field('wd1','O que existe de novo nessa abordagem?'),field('wd2','O que torna a solução difícil de comparar diretamente?'),field('wd3','Por que o cliente compraria isso em vez de "uma automação"?')]))+'</div>'+
+    sub('D · One-liner: como o mecanismo funciona?','<p class="fillsent">O '+slot('ol1','mecanismo')+' utiliza '+slot('ol2','tecnologia / IA')+' para transformar '+slot('ol3','input')+' em '+slot('ol4','resultado')+', sem depender de '+slot('ol5','método antigo')+'.</p>'));
+
+  chapter('oferta','Oferta');
+  h+=sec('oferta','07','Oferta','Transforme a infraestrutura em uma proposta de valor premium.',
+    sub('A · The Promise','<p class="fillsent">Nós ajudamos '+slot('pr1','nicho / ICP')+' a '+slot('pr2','resultado de negócio')+' por meio do '+slot('pr3','mecanismo único')+' sem depender de '+slot('pr4','método antigo / gargalo')+'.</p>')+
+    '<div class="grid2">'+
+    sub('B · Value Equation',rowsOf([field('ve1','Problema que eliminamos'),field('ve2','Resultado que criamos'),field('ve3','Impacto financeiro potencial'),field('ve4','Por que isso importa agora?')]))+
+    sub('C · What They Get: entregáveis principais',rowsOf([inp('wg1',{ph:'Entregável 01'}),inp('wg2',{ph:'Entregável 02'}),inp('wg3',{ph:'Entregável 03'}),inp('wg4',{ph:'Entregável 04'}),inp('wg5',{ph:'Entregável 05'})])+'<p class="note">O valor percebido vem do resultado e do mecanismo, não da quantidade de tarefas. Evite a lista enorme.</p>')+'</div>'+
+    sub('D · Monetization','<div class="money">'+field('mo_setup','Setup / Release Fee',{money:true})+field('mo_ret','Management / Retainer (por mês)',{money:true})+field('mo_ful','Custo de fulfillment (por mês)',{money:true})+field('mo_mrg','Margem bruta estimada (%)',{num:true})+field('mo_cac','CAC-alvo',{money:true})+'</div><div class="readout"><ul id="moCalc"></ul></div><p class="note">Prefira fee premium no setup e mensalidade depois: captura valor na entrada e libera caixa para reinvestir em aquisição.</p>')+
+    sub('E · ROI Logic','<div class="grid2">'+field('roi1','Quantos clientes ou resultados o cliente precisa gerar para recuperar o investimento?')+rowsOf([field('roi2','Quanto vale um novo cliente para ele?',{money:true}),field('roi3','Quanto vale o problema que estamos resolvendo? (por mês)',{money:true})])+'</div><div style="margin-top:14px">'+field('roi4','Por que o investimento é economicamente óbvio?')+'</div><div class="readout"><ul id="roiCalc"></ul></div>'));
+
+  chapter('modelo','Modelo de negócio');
+  h+=sec('modelo','08','The R$100K/Mês Model','Desenhe a matemática do seu negócio AI-First. O R$100K deixa de ser aspiração e vira conta.',
+    '<div class="model-box"><div class="cells">'+
+    '<div class="cell"><label class="cl" for="f-k_setup">Setup médio por cliente</label><div class="cur">'+inp('k_setup',{money:true})+'</div></div>'+
+    '<div class="cell"><label class="cl" for="f-k_mrr">MRR médio por cliente</label><div class="cur">'+inp('k_mrr',{money:true})+'</div></div>'+
+    '<div class="cell"><label class="cl" for="f-k_novos">Novos clientes / mês</label>'+inp('k_novos',{num:true,ph:'0'})+'</div>'+
+    '<div class="cell"><label class="cl" for="f-k_rec">Clientes recorrentes</label>'+inp('k_rec',{num:true,ph:'0'})+'</div>'+
+    '<div class="cell"><label class="cl" for="f-k_churn">Churn mensal (%)</label>'+inp('k_churn',{num:true,ph:'5'})+'</div></div>'+
+    '<div><div class="themath" id="l1"></div><div class="themath" id="l2"></div><div class="total" id="ktot"></div></div>'+
+    '<div><div class="gauge" role="img" id="gaugeA"><i id="gaugeI"></i></div><div class="gauge-meta"><span>R$ 0</span><span>Meta R$ 100 mil / mês</span></div></div>'+
+    '<p class="status-line" id="kstatus"></p>'+
+    '<div class="readout"><span class="eyebrow">Para chegar a R$100K</span><ul id="reverse"></ul></div>'+
+    '<div><span class="eyebrow">Projeção de 12 meses</span><p class="note" id="projNote" style="margin-top:6px"></p><div class="chart" id="chart"></div><div class="legend" id="legend" hidden><span><i style="background:var(--accent)"></i>Recorrência</span><span><i style="background:var(--alt)"></i>Setup dos novos clientes</span><span><i style="background:var(--fg)"></i>Meta de R$100 mil</span></div></div></div>');
+
+  cur=null;
+  h+='<section class="final" id="etapa-blueprint" data-ch="blueprint"><span class="eyebrow">The AI-First Business Blueprint</span><h2>Decisão final</h2><div class="fgrid" id="bpGrid"></div><div class="final-foot"><span class="mono muted" id="bpCount"></span><span class="meta-goal">META · R$100K / MÊS</span></div><div id="exportBox" hidden><textarea id="exportTa" class="fld area" readonly aria-label="Blueprint em texto"></textarea></div></section>';
+  h+='<section class="offer" id="etapa-teste" data-ch="teste"><div class="sec-head"><span class="sec-n">◆</span><div><h2>The AI-First Offer Test</h2><p>Valide sua oferta antes de construir. Marque cada item com honestidade.</p></div></div><div class="otlist">'+OT.map(function(t,i){return chk('ot'+i,t)}).join('')+'</div><div class="ot-count"><span id="otCount">0 / 19 marcados</span><span id="otVerdict"></span></div></section>';
+  h+='<section class="princ"><span class="eyebrow">Princípios GrowthAI System</span><p>A maré sobe que levanta todos os barcos. Quando a solução faz o cliente crescer, cria prova, financiamento e oportunidade para a operação inteira.</p><p>Ao entrar num mercado onde a demanda excede a oferta, você cria resultados extraordinários.</p><p>Use dados reais de lançamentos para validar o gap, evitar armadilhas e acelerar a jornada.</p><div class="tag">DADOS + MECANISMO + EXECUÇÃO = ESCALA REAL E PREVISÍVEL.</div></section>';
+  h+='<div id="backupBox" hidden><span class="eyebrow">Backup das suas respostas</span><textarea id="bkTa" class="fld area" aria-label="Backup em texto" placeholder="Cole aqui um backup para restaurar"></textarea><div class="bk-actions"><button type="button" class="btn" id="bkCopy">Copiar backup</button><button type="button" class="btn ghost" id="bkRestore">Restaurar do texto</button></div></div>';
+  h+='<footer class="foot"><div class="arrow">MERCADO CERTO → GAP CERTO → INFRAESTRUTURA CERTA → OFERTA CERTA → ESCALA</div><div>Construa sistemas que geram valor. Empacote o mecanismo. Venda a transformação.</div><div>GrowthAI System™ · AI-First Business Playbook</div></footer>';
+
+  $('#wbRoot').innerHTML=h;
+  $('#nav').innerHTML=CH.map(function(c,i){return '<a href="#etapa-'+c.id+'" data-go="'+c.id+'"><span class="dot" data-dot="'+c.id+'"></span><span class="n">0'+(i+1)+'</span>'+c.title+'</a>'}).join('')+
+    '<a href="#etapa-blueprint" data-go="blueprint"><span class="dot none"></span><span class="n">→</span>Meu blueprint</a><a href="#etapa-teste" data-go="teste"><span class="dot none"></span><span class="n">◆</span>Offer Test</a>';
+  twoStep($('#btnBanner'),'Confirmar: apagar o exemplo',function(){resetAll();toast('Playbook limpo')});
+  observe();
+}
+
+var io=null;
+function observe(){
+  if(io)io.disconnect();
+  if(!('IntersectionObserver' in window))return;
+  io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){document.querySelectorAll('#nav a').forEach(function(a){a.classList.toggle('on',a.dataset.go===e.target.dataset.ch)})}})},{rootMargin:'-25% 0px -65% 0px'});
+  document.querySelectorAll('#wbRoot [data-ch]').forEach(function(s){io.observe(s)});
+}
+
+/* ---------- cálculos do workbook ---------- */
+function niceStep(max){var t=max/4,mag=Math.pow(10,Math.floor(Math.log10(t))),m=t/mag;var f=m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10;return f*mag}
+function chartSvg(s,m,n,r,ch){
+  var rows=[],rec=r,t;
+  for(t=1;t<=12;t++){rec=rec*(1-ch)+n;rows.push({t:t,rec:rec*m,setup:n*s})}
+  var maxV=Math.max.apply(null,[GOAL].concat(rows.map(function(x){return x.rec+x.setup})))*1.05;
+  var step=niceStep(maxV),ymax=Math.ceil(maxV/step)*step;
+  var W=720,H=270,L=66,R=12,T=14,B=32,pw=W-L-R,ph=H-T-B;
+  var y=function(v){return T+ph-(v/ymax)*ph};
+  var bw=pw/12,g='',v,cross=0;
+  for(v=0;v<=ymax+1e-6;v+=step){g+='<line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/><text class="t" x="'+(L-8)+'" y="'+(y(v)+4).toFixed(1)+'" text-anchor="end">'+axisLbl(v)+'</text>'}
+  rows.forEach(function(x,i){
+    var bx=L+i*bw+bw*.18,w=bw*.64,hr=(x.rec/ymax)*ph,hs=(x.setup/ymax)*ph;
+    g+='<rect class="b1" x="'+bx.toFixed(1)+'" y="'+(T+ph-hr).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+hr.toFixed(1)+'" rx="2"/>';
+    if(hs>0)g+='<rect class="b2" x="'+bx.toFixed(1)+'" y="'+(T+ph-hr-hs).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+hs.toFixed(1)+'" rx="2"/>';
+    g+='<text class="t" x="'+(bx+w/2).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle">M'+x.t+'</text>';
+    if(!cross&&x.rec+x.setup>=GOAL)cross=x.t;
+  });
+  g+='<line class="goal" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(GOAL).toFixed(1)+'" y2="'+y(GOAL).toFixed(1)+'"/>';
+  g+='<rect class="lblbg" x="'+(W-R-104)+'" y="'+(y(GOAL)-19).toFixed(1)+'" width="104" height="16" rx="3"/><text class="gt" x="'+(W-R-4)+'" y="'+(y(GOAL)-7).toFixed(1)+'" text-anchor="end">Meta R$ 100 mil</text>';
+  return {svg:'<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Projeção de receita mensal em 12 meses comparada à meta de R$100 mil">'+g+'</svg>',cross:cross};
+}
+function nicheVerdict(ns,nc){
+  if(nc===0)return {t:'Sem avaliação',c:''};
+  if(nc<10)return {t:nc+' de 10 critérios avaliados',c:''};
+  if(ns>=43)return {t:'Excelente',c:'good'};
+  if(ns>=35)return {t:'Forte',c:'good'};
+  if(ns>=25)return {t:'Promissor',c:'warn'};
+  return {t:'Fraco',c:'bad'};
+}
+var chipH=function(v){return '<span class="chip '+v.c+'">'+v.t+'</span>'};
+var LAST={};
+
+function refresh(){
+  var n,r,i;
+  var an=S.atlas_niche,am=S.atlas_market;
+  $('#selNiche').textContent=an||'Qual oportunidade você quer explorar?';
+  $('#selMarket').textContent=an?('Mercado: '+am+'. Revise cada etapa com os dados do seu caso.'):'Escolha um nicho no universo 3D ou comece preenchendo o playbook.';
+
+  var tot=[],cnt=[],lead=0;
+  for(n=1;n<=5;n++){
+    var s=0,c=0;
+    for(r=0;r<MDC.length;r++){var v=+S['md'+r+'_'+n];if(v){s+=v;c++}}
+    tot[n]=s;cnt[n]=c;
+    var th=$('#mdh'+n);if(th)th.textContent=cut(S['m'+n],24)||('Nicho 0'+n);
+  }
+  for(n=1;n<=5;n++){if(cnt[n]&&(!lead||tot[n]>tot[lead]))lead=n}
+  for(n=1;n<=5;n++){var t=$('#mdt'+n);if(t){t.textContent=cnt[n]?tot[n]:'–';t.classList.toggle('lead',n===lead)}}
+  var ln=lead?esc(S['m'+lead]||('Nicho 0'+lead)):'';
+  $('#mdLead').innerHTML=lead?'Candidato mais forte: <b>'+ln+'</b> com '+tot[lead]+' de 30 pontos.':'Avalie os critérios para ver qual nicho se destaca.';
+  $('#mgLead').innerHTML=lead?'Use o candidato que mais se destacou no Market Data (<b>'+ln+'</b>) e investigue onde esse mercado perde dinheiro.':'Use o candidato que mais se destacou no Market Data e investigue onde esse mercado perde dinheiro.';
+
+  var ns=0,nc=0;
+  for(i=0;i<NS.length;i++){var vv=+S['ns'+i];if(vv){ns+=vv;nc++}}
+  $('#nicheScore').textContent=ns;
+  $('#nicheBar').style.width=(ns/50*100)+'%';
+  var nv=nicheVerdict(ns,nc);
+  $('#nicheVerdict').innerHTML=chipH(nv);
+
+  var ts=0;for(i=1;i<=6;i++)if(S['ts'+i]===true)ts++;
+  $('#stackCov').innerHTML='Camadas do stack definidas: <b>'+ts+' de 6</b>';
+  var ca=0;for(i=1;i<=10;i++)if(S['ca'+i]===true)ca++;
+  $('#assetsCov').innerHTML='Ativos construídos uma vez: <b>'+ca+' de 10</b>'+(S.ca_o?' + 1 extra':'');
+
+  var su=num(S.mo_setup),re=num(S.mo_ret),fu=num(S.mo_ful),cac=num(S.mo_cac);
+  var L=[];
+  if(re>0&&fu>0){var calc=Math.round((re-fu)/re*100);L.push('Margem bruta calculada na mensalidade: <b>'+calc+'%</b>'+((S.mo_mrg!==undefined&&S.mo_mrg!==''&&Math.abs(calc-num(S.mo_mrg))>5)?' (sua estimativa: '+num(S.mo_mrg)+'%)':''))}
+  if(su>0||re>0)L.push('Caixa no primeiro mês: <b>'+BRL(su+re-fu)+'</b> (setup + mensalidade − fulfillment)');
+  if(cac>0&&(su+re)>0){
+    var first=su+re-fu;
+    if(first>=cac)L.push('CAC-alvo recuperado <b>no primeiro mês</b>');
+    else if(re>fu)L.push('CAC-alvo recuperado em <b>'+(1+Math.ceil((cac-first)/(re-fu)))+' meses</b>');
+    else L.push('A mensalidade não cobre o fulfillment, então o CAC não se recupera.');
+  }
+  $('#moCalc').innerHTML=L.length?L.map(function(x){return '<li>'+x+'</li>'}).join(''):'<li class="muted">Preencha setup, mensalidade e custo para ver margem e payback.</li>';
+  var v1=num(S.roi2),v2=num(S.roi3),RL=[];
+  if(v1>0&&(su+re)>0)RL.push('Para pagar setup e primeira mensalidade ('+BRL(su+re)+'), o cliente precisa de <b>'+Math.ceil((su+re)/v1)+' novo(s) cliente(s)</b>.');
+  if(v2>0&&re>0)RL.push('O problema custa <b>'+(v2/re).toFixed(1).replace('.',',')+'×</b> a mensalidade, por mês.');
+  $('#roiCalc').innerHTML=RL.length?RL.map(function(x){return '<li>'+x+'</li>'}).join(''):'<li class="muted">Informe o valor de um novo cliente e do problema para ver o ROI.</li>';
+
+  var ks=num(S.k_setup),km=num(S.k_mrr),kn=num(S.k_novos),kr=num(S.k_rec);
+  var churn=(S.k_churn===undefined||S.k_churn==='')?0.05:Math.min(num(S.k_churn),100)/100;
+  var total=kn*ks+kr*km,has=ks>0||km>0||kn>0||kr>0,pct=total/GOAL;
+  $('#l1').innerHTML='<b>'+kn+'</b> novos clientes × <b>'+BRL(ks)+'</b> de setup = <b>'+BRL(kn*ks)+'</b>';
+  $('#l2').innerHTML='<b>'+kr+'</b> recorrentes × <b>'+BRL(km)+'</b>/mês = <b>'+BRL(kr*km)+'</b>';
+  $('#ktot').innerHTML=BRL(total)+' <small>por mês</small>';
+  $('#gaugeI').style.width=Math.min(100,pct*100)+'%';
+  $('#gaugeA').setAttribute('aria-label',Math.round(pct*100)+'% da meta de R$100 mil por mês');
+  $('#kstatus').textContent=!has?'Preencha os números para ver a distância até a meta.':pct>=1?'Meta batida, com '+BRL(total-GOAL)+' acima de R$100 mil.':'Faltam '+BRL(GOAL-total)+' para a meta ('+Math.round(pct*100)+'% do caminho).';
+  var RV=[];
+  if(km>0)RV.push('Só com recorrência: <b>'+Math.ceil(GOAL/km)+' clientes recorrentes</b> a '+BRL(km)+'/mês.');
+  if(km>0&&kn>0&&ks>0)RV.push('Com '+kn+' novos por mês: <b>'+Math.ceil(Math.max(0,GOAL-kn*ks)/km)+' recorrentes</b>.');
+  if(ks>0&&kr>0&&km>0)RV.push('Com '+kr+' recorrentes: <b>'+Math.ceil(Math.max(0,GOAL-kr*km)/ks)+' novos por mês</b>.');
+  $('#reverse').innerHTML=RV.length?RV.map(function(x){return '<li>'+x+'</li>'}).join(''):'<li class="muted">Informe setup e MRR para calcular quantos clientes fecham a conta.</li>';
+  if(ks>0||km>0){
+    var cr=chartSvg(ks,km,kn,kr,churn);
+    $('#chart').innerHTML=cr.svg;$('#legend').hidden=false;
+    $('#projNote').textContent='Com churn de '+Math.round(churn*1000)/10+'% ao mês e '+kn+' novos clientes por mês, '+(cr.cross?'a receita cruza R$100 mil no mês '+cr.cross+'.':'a receita não cruza R$100 mil em 12 meses.');
+  }else{
+    $('#chart').innerHTML='';$('#legend').hidden=true;
+    $('#projNote').textContent='Informe setup, MRR e clientes para ver a projeção.';
+  }
+
+  var oc=0;for(i=0;i<OT.length;i++)if(S['ot'+i]===true)oc++;
+  var ov=oc>=17?{t:'Pronta para construir',c:'good'}:oc>=12?{t:'Quase lá: feche as lacunas',c:'warn'}:oc>0?{t:'Revise antes de construir',c:'bad'}:{t:'',c:''};
+  $('#otCount').textContent=oc+' / 19 marcados';
+  $('#otVerdict').innerHTML=ov.t?chipH(ov):'';
+
+  var su0=ks||su,m0=km||re;
+  var prom=(function(){var a=[S.pr1,S.pr2,S.pr3,S.pr4];if(!a.some(Boolean))return '';return 'Nós ajudamos '+(a[0]||'…')+' a '+(a[1]||'…')+' por meio do '+(a[2]||'…')+', sem depender de '+(a[3]||'…')+'.'})();
+  var infra=[S.tf1,S.tf2,S.tf4,S.tf5].map(function(x){return cut(x,38)}).filter(Boolean).join(' → ');
+  var bp=[['Meu nicho',S.n_nicho],['Meu ICP',S.n_icp],['Meu problema Nº 1',S.g_p1],['Minha infraestrutura',infra],['Meu mecanismo',S.nm_final?S.nm_final+'™':''],['Minha promessa',prom,true],['Meu setup',su0?BRL(su0):''],['Meu MRR',m0?BRL(m0):''],['Meta de clientes',m0?Math.ceil(GOAL/m0)+' clientes recorrentes (só com MRR)':'']];
+  var filled=0;
+  $('#bpGrid').innerHTML=bp.map(function(b){var ok=!!String(b[1]||'').trim();if(ok)filled++;return '<div class="bp'+(ok?'':' empty')+(b[2]?' wide':'')+'"><span class="eyebrow">'+b[0]+'</span><p>'+(ok?esc(b[1]):'Preencha nas etapas acima')+'</p></div>'}).join('');
+  $('#bpCount').textContent=filled+' de 9 campos preenchidos';
+  LAST={bp:bp,total:total,ns:ns,oc:oc};
+
+  var started=0;
+  CH.forEach(function(c){
+    var on=c.keys.some(function(k){var x=S[k];return x!==undefined&&x!==null&&x!==''&&x!==false});
+    if(on)started++;
+    var d=document.querySelector('[data-dot="'+c.id+'"]');if(d)d.classList.toggle('done',on);
+  });
+  $('#progT').textContent=started+' de '+CH.length+' etapas iniciadas';
+  $('#progB').style.width=(started/CH.length*100)+'%';
+
+  $('#dNiche').innerHTML=nc?ns+'<small> / 50</small>':'—';
+  $('#dNicheSub').innerHTML=nc?chipH(nv):'Avalie 10 critérios';
+  $('#dNicheBar').style.width=(ns/50*100)+'%';
+  $('#dProd').textContent=S.pt||'—';
+  $('#dProdSub').textContent=ca+' de 10 ativos construídos uma vez';
+  $('#dOffer').innerHTML=oc+'<small> / 19</small>';
+  $('#dOfferSub').innerHTML=ov.t?chipH(ov):'Marque cada item com honestidade';
+  $('#dModel').textContent=has?BRL(total):'—';
+  $('#dModelSub').textContent=has?Math.round(pct*100)+'% da meta de R$100K/mês':'Preencha a etapa 08';
+  $('#dModelBar').style.width=Math.min(100,pct*100)+'%';
+  $('#banner').hidden=S.__example!==true;
+}
+
+/* ---------- eventos do workbook ---------- */
+function onChange(e){
+  var el=e.target;var k=el.dataset&&el.dataset.k;if(!k)return;
+  var v;
+  if(el.type==='checkbox')v=el.checked;
+  else if(el.type==='radio'){if(!el.checked)return;v=el.value}
+  else v=el.value;
+  S[k]=v;save();refresh();
+}
+document.addEventListener('input',onChange);
+document.addEventListener('change',onChange);
+document.addEventListener('click',function(e){
+  var t=e.target;if(!t.closest)return;
+  var a=t.closest('#nav a');
+  if(a){e.preventDefault();var el=document.getElementById('etapa-'+a.dataset.go);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(t.closest('[data-go-atlas]')){setView('atlas');return}
+  if(t.closest('#bkCopy')){var ta=$('#bkTa');ta.value=JSON.stringify(S);copyText(JSON.stringify(S),ta,'Backup copiado');return}
+  if(t.closest('#bkRestore')){
+    try{var o=JSON.parse($('#bkTa').value);if(!o||typeof o!=='object'||Array.isArray(o))throw 0;S=o;save();build();refresh();toast('Backup restaurado')}catch(x){toast('Texto de backup inválido')}
+    return;
+  }
+});
+
+/* ---------- ações ---------- */
+var toastT=null;
+function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true},2600)}
+function copyText(text,ta,okMsg){
+  var fb=function(){ta.hidden=false;if(ta.parentNode&&ta.parentNode.hidden)ta.parentNode.hidden=false;ta.value=text;ta.focus();ta.select();toast('Selecione e copie o texto exibido')};
+  try{navigator.clipboard.writeText(text).then(function(){toast(okMsg)},fb)}catch(e){fb()}
+}
+function twoStep(btn,confirmLabel,fn){
+  if(!btn)return;
+  var orig=btn.textContent,t=null;
+  btn.addEventListener('click',function(){
+    if(btn.dataset.armed){clearTimeout(t);delete btn.dataset.armed;btn.textContent=orig;fn();return}
+    btn.dataset.armed='1';btn.textContent=confirmLabel;
+    t=setTimeout(function(){delete btn.dataset.armed;btn.textContent=orig},4000);
+  });
+}
+function resetAll(){S={};save();build();refresh();status();window.scrollTo({top:0})}
+function loadExample(){S=Object.assign({},EX,{__example:true});save();build();refresh();status();window.scrollTo({top:0})}
+twoStep($('#btnReset'),'Confirmar: apagar tudo',function(){resetAll();toast('Playbook limpo')});
+twoStep($('#btnExample'),'Confirmar: trocar pelo exemplo',function(){loadExample();toast('Exemplo carregado')});
+$('#btnBackup').addEventListener('click',function(){var b=$('#backupBox');b.hidden=!b.hidden;if(!b.hidden){$('#bkTa').value=JSON.stringify(S);b.scrollIntoView({behavior:'smooth',block:'center'})}});
+$('#btnCopy').addEventListener('click',function(){
+  var lines=['PLAYBOOK AI-FIRST · BLUEPRINT',''];
+  (LAST.bp||[]).forEach(function(b){lines.push(b[0]+': '+(b[1]||'—'))});
+  lines.push('','Meta: R$ 100.000 por mês','Receita mensal do modelo: '+BRL(LAST.total||0),'Niche Score: '+(LAST.ns||0)+'/50','Offer Test: '+(LAST.oc||0)+'/19');
+  var box=$('#exportBox');
+  copyText(lines.join('\n'),$('#exportTa'),'Blueprint copiado');
+  if(!box.hidden)box.scrollIntoView({block:'center'});
+});
+
+/* =====================================================
+   ETAPA 01: CENA 3D (canvas 2D com projeção em perspectiva)
+   ===================================================== */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function fib(n,rad,seed){var rnd=mulberry(seed),out=[];for(var i=0;i<n;i++){var y=1-(i+.5)*2/n,r=Math.sqrt(1-y*y),th=i*2.399963+rnd()*.3,k=rad*(.9+rnd()*.14);out.push({x:Math.cos(th)*r*k,y:y*k,z:Math.sin(th)*r*k})}return out}
+function linksFor(ns,per){
+  var L=[],seen={};
+  ns.forEach(function(a,i){
+    var d=[];
+    ns.forEach(function(b,j){if(j!==i)d.push({j:j,d:Math.pow(a.x-b.x,2)+Math.pow(a.y-b.y,2)+Math.pow(a.z-b.z,2)})});
+    d.sort(function(p,q){return p.d-q.d});
+    for(var k=0;k<per&&k<d.length;k++){var j=d[k].j,key=i<j?i+'-'+j:j+'-'+i;if(!seen[key]){seen[key]=1;L.push([i,j])}}
+  });
+  return L;
+}
+function ringPts(r,tx,tz){
+  var pts=[],a;
+  for(a=0;a<=72;a++){
+    var t=a/72*6.2832,x=Math.cos(t)*r,z=Math.sin(t)*r,y=0;
+    var y1=y*Math.cos(tx)-z*Math.sin(tx),z1=y*Math.sin(tx)+z*Math.cos(tx);
+    var x1=x*Math.cos(tz)-y1*Math.sin(tz),y2=x*Math.sin(tz)+y1*Math.cos(tz);
+    pts.push({x:x1,y:y2,z:z1});
+  }
+  return pts;
+}
+
+var Scene=(function(){
+  var cvs=$('#map'),ctx=cvs.getContext('2d'),box=$('#scene-container');
+  var W=300,H=300,dpr=1,S0=100,cx=150,cy=150;
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var yaw=.6,pitch=.3,zoom=1,auto=!reduce,drag=null,vyaw=0;
+  var focus=-1,selN=-1,m=0,mt=0,shift=0,shiftT=0,hover=-1;
+  var fNodes=[],fLinks=[],fColor='#8b5cf6';
+  var hits=[];
+  var cY=1,sY=0,cP=1,sP=0;
+  var dust=[],i,rd=mulberry(7);
+  for(i=0;i<1100;i++){var u=rd()*2-1,t=rd()*6.2832,r=Math.sqrt(1-u*u),k=.78+Math.pow(rd(),.6)*.3;dust.push({x:Math.cos(t)*r*k,y:u*k,z:Math.sin(t)*r*k,s:rd()<.08?2:1})}
+  var ovNodes=fib(MK.length,.92,3).map(function(p,i){p.i=i;p.c=MK[i].c;p.name=MK[i].n;return p});
+  var ovLinks=linksFor(ovNodes,2);
+  var rings=[ringPts(1.12,1.15,.2),ringPts(1.0,.4,-.7),ringPts(1.22,-.5,.5)];
+  var wire=[ringPts(.2,0,0),ringPts(.2,1.5708,0),ringPts(.2,0,1.5708)];
+  var api={onPick:null};
+
+  function view(p){
+    var x=p.x*cY+p.z*sY,z=-p.x*sY+p.z*cY;
+    var y=p.y*cP-z*sP;z=p.y*sP+z*cP;
+    var s=4/(4-z);
+    return {x:cx+x*S0*s,y:cy-y*S0*s,z:z,s:s};
+  }
+  function resize(){
+    var rc=box.getBoundingClientRect();
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    W=Math.max(200,rc.width);H=Math.max(200,rc.height);
+    cvs.width=Math.round(W*dpr);cvs.height=Math.round(H*dpr);
+  }
+  function label(txt,x,y,c,a,upper){
+    ctx.font='500 11px '+getComputedStyle(document.body).getPropertyValue('--mono');
+    var t=upper?txt.toUpperCase():txt;
+    if('letterSpacing' in ctx)ctx.letterSpacing=upper?'1.2px':'0px';
+    var w=ctx.measureText(t).width+26,h=22;
+    ctx.globalAlpha=a;
+    ctx.fillStyle='rgba(10,6,22,.82)';ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y-h/2,w,h,4):ctx.rect(x,y-h/2,w,h);ctx.fill();ctx.stroke();
+    ctx.fillStyle=c;ctx.beginPath();ctx.arc(x+10,y,2.2,0,6.2832);ctx.fill();
+    ctx.fillStyle='#e6e0f5';ctx.textBaseline='middle';ctx.fillText(t,x+18,y+.5);
+    ctx.globalAlpha=1;
+  }
+  function core(c,a){
+    var p=view({x:0,y:0,z:0}),R=S0*.34;
+    var g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,R);
+    g.addColorStop(0,'rgba(255,255,255,'+(.95*a)+')');g.addColorStop(.16,hexA(c,.8*a));g.addColorStop(.5,hexA(c,.2*a));g.addColorStop(1,hexA(c,0));
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,R,0,6.2832);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,'+(.3*a)+')';ctx.lineWidth=1;
+    wire.forEach(function(w){ctx.beginPath();w.forEach(function(q,j){var pp=view(q);j?ctx.lineTo(pp.x,pp.y):ctx.moveTo(pp.x,pp.y)});ctx.stroke()});
+  }
+  function layer(ns,links,alpha,isMarket,selIdx,withCenter){
+    if(alpha<.02)return;
+    var P=ns.map(view),cp=view({x:0,y:0,z:0});
+    ctx.lineWidth=1;
+    links.forEach(function(l){
+      var a=P[l[0]],b=P[l[1]],d=(a.z+b.z+2.4)/4.8;
+      ctx.strokeStyle='rgba(190,170,255,'+(.2*alpha*d)+')';
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+    });
+    if(withCenter){
+      P.forEach(function(p){var d=(p.z+1.2)/2.4;ctx.strokeStyle='rgba(190,170,255,'+(.14*alpha*d)+')';ctx.beginPath();ctx.moveTo(cp.x,cp.y);ctx.lineTo(p.x,p.y);ctx.stroke()});
+    }
+    var list=ns.map(function(n,i){return {n:n,i:i,p:P[i]}}).sort(function(a,b){return a.p.z-b.p.z});
+    var active=alpha>.5;
+    list.forEach(function(o){
+      var p=o.p,n=o.n,depth=(p.z+1.2)/2.4,a=alpha*(.4+.6*depth),rr=(isMarket?6:5.5)*p.s;
+      if(active)hits.push({i:o.i,x:p.x,y:p.y,r:Math.max(14,rr*2)});
+      var g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,rr*3.4);
+      g.addColorStop(0,hexA(n.c,.55*a));g.addColorStop(1,hexA(n.c,0));
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,rr*3.4,0,6.2832);ctx.fill();
+      ctx.strokeStyle=hexA(n.c,a);ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(p.x,p.y,rr,0,6.2832);ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.beginPath();ctx.arc(p.x,p.y,rr*.4,0,6.2832);ctx.fill();
+      if(selIdx===o.i){ctx.strokeStyle=hexA(n.c,alpha);ctx.lineWidth=1;ctx.beginPath();ctx.arc(p.x,p.y,rr*2,0,6.2832);ctx.stroke()}
+      var show=p.z>.12||hover===o.i&&active||selIdx===o.i;
+      if(show&&active)label(n.name,p.x+rr+8,p.y,n.c,hover===o.i||selIdx===o.i?1:clamp(.35+depth,.4,.95),isMarket);
+    });
+  }
+  function draw(){
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W,H);
+    S0=Math.min(W-shift,H)*.36*zoom;
+    cx=(W-shift)/2;cy=H/2+8;
+    cY=Math.cos(yaw);sY=Math.sin(yaw);cP=Math.cos(pitch);sP=Math.sin(pitch);
+    hits=[];
+    var d;
+    for(d=0;d<dust.length;d++){
+      var q=dust[d],p=view(q),a=.1+.55*(p.z+1.2)/2.4;
+      ctx.fillStyle='rgba(205,190,255,'+a.toFixed(3)+')';
+      ctx.fillRect(p.x,p.y,q.s,q.s);
+    }
+    ctx.lineWidth=1;ctx.strokeStyle='rgba(185,162,255,.2)';
+    rings.forEach(function(rg){ctx.beginPath();rg.forEach(function(q,j){var pp=view(q);j?ctx.lineTo(pp.x,pp.y):ctx.moveTo(pp.x,pp.y)});ctx.stroke()});
+    core('#8b5cf6',1-m);
+    if(m>0)core(fColor,m);
+    layer(ovNodes,ovLinks,1-m,true,-1,false);
+    layer(fNodes,fLinks,m,false,selN,true);
+  }
+  function frame(){
+    requestAnimationFrame(frame);
+    if(document.hidden||$('#viewAtlas').hidden)return;
+    if(auto&&!drag)yaw+=.0016;
+    if(!drag){yaw+=vyaw;vyaw*=.94}
+    m+=(mt-m)*.08;if(Math.abs(mt-m)<.002)m=mt;
+    shift+=(shiftT-shift)*.12;if(Math.abs(shiftT-shift)<.3)shift=shiftT;
+    draw();
+  }
+  function hitAt(px,py){
+    var best=-1,bd=1e9;
+    hits.forEach(function(h){var d=Math.hypot(h.x-px,h.y-py);if(d<h.r+6&&d<bd){bd=d;best=h.i}});
+    return best;
+  }
+  cvs.addEventListener('pointerdown',function(e){try{cvs.setPointerCapture(e.pointerId)}catch(x){}drag={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,moved:false};vyaw=0;cvs.style.cursor='grabbing'});
+  cvs.addEventListener('pointermove',function(e){
+    var rc=cvs.getBoundingClientRect(),px=e.clientX-rc.left,py=e.clientY-rc.top;
+    if(drag){
+      var dx=e.clientX-drag.lx,dy=e.clientY-drag.ly;drag.lx=e.clientX;drag.ly=e.clientY;
+      if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>5)drag.moved=true;
+      if(drag.moved){yaw+=dx*.006;pitch=clamp(pitch+dy*.005,-1.2,1.2);vyaw=dx*.0004}
+    }else{hover=hitAt(px,py);cvs.style.cursor=hover>=0?'pointer':'grab'}
+  });
+  cvs.addEventListener('pointerup',function(e){
+    var rc=cvs.getBoundingClientRect();
+    if(drag&&!drag.moved){var h=hitAt(e.clientX-rc.left,e.clientY-rc.top);if(h>=0&&api.onPick)api.onPick(h)}
+    drag=null;cvs.style.cursor='grab';
+  });
+  cvs.addEventListener('pointerleave',function(){hover=-1});
+  cvs.addEventListener('keydown',function(e){
+    var k=e.key,used=true;
+    if(k==='ArrowLeft')yaw-=.12;else if(k==='ArrowRight')yaw+=.12;else if(k==='ArrowUp')pitch=clamp(pitch-.1,-1.2,1.2);else if(k==='ArrowDown')pitch=clamp(pitch+.1,-1.2,1.2);
+    else if(k==='+'||k==='=')zoom=clamp(zoom*1.15,.6,2.2);else if(k==='-')zoom=clamp(zoom/1.15,.6,2.2);else used=false;
+    if(used)e.preventDefault();
+  });
+  if('ResizeObserver' in window)new ResizeObserver(resize).observe(box);else window.addEventListener('resize',resize);
+  resize();requestAnimationFrame(frame);
+
+  api.resize=resize;
+  api.setFocus=function(i){
+    focus=i;selN=-1;hover=-1;
+    if(i>=0){
+      fColor=MK[i].c;
+      fNodes=fib(MK[i].v.length,.78,11+i).map(function(p,j){p.i=j;p.c=MK[i].c;p.name=MK[i].v[j][0];return p});
+      fLinks=linksFor(fNodes,1);mt=1;
+    }else mt=0;
+  };
+  api.setSelected=function(j){selN=j};
+  api.setShift=function(px){shiftT=px};
+  api.reset=function(){yaw=.6;pitch=.3;zoom=1};
+  api.zoomBy=function(f){zoom=clamp(zoom*f,.6,2.2)};
+  api.toggleAuto=function(){auto=!auto;return auto};
+  api.isAuto=function(){return auto};
+  return api;
+})();
+
+/* =====================================================
+   ETAPA 01: lista, painel e seleção
+   ===================================================== */
+var A={m:-1,n:-1,tab:0,open:false};
+var narrow=function(){return window.innerWidth<=960};
+
+function renderList(){
+  var q=norm($('#market-search').value.trim()),h='',c=0;
+  MK.forEach(function(mk,i){
+    var hit=!q||norm(mk.n).indexOf(q)>-1,sub=[];
+    if(q&&!hit){mk.v.forEach(function(v){if(norm(v[0]).indexOf(q)>-1)sub.push(v[0])})}
+    if(q&&!hit&&!sub.length)return;
+    c++;
+    h+='<button type="button" class="mk'+(A.m===i?' on':'')+'" data-i="'+i+'"><i class="mdot" style="background:'+mk.c+'"></i><span class="mname">'+esc(mk.n)+(sub.length?'<small>'+esc(sub.slice(0,2).join(' · '))+'</small>':'')+'</span><span class="mcount">'+pad(mk.v.length)+'</span><span class="arr" aria-hidden="true">↗</span></button>';
+  });
+  $('#legend-markets').innerHTML=h||'<p class="empty">Nenhum mercado encontrado.</p>';
+  $('#list-caption').textContent=q?'RESULTADOS':'TODOS OS MERCADOS';
+  $('#market-total').textContent=c;
+  $('#search-status').textContent=c+' mercados encontrados';
+}
+function iso(c){
+  return '<svg viewBox="0 0 280 170" aria-hidden="true" focusable="false"><ellipse cx="140" cy="128" rx="118" ry="40" fill="none" stroke="'+c+'" stroke-opacity=".22"/><polygon points="140,164 38,128 140,92 242,128" fill="'+c+'" fill-opacity=".07" stroke="'+c+'" stroke-opacity=".3"/><polygon points="140,152 72,128 140,104 208,128" fill="'+c+'" fill-opacity=".1" stroke="'+c+'" stroke-opacity=".4"/><polygon points="140,44 192,70 140,96 88,70" fill="'+c+'" fill-opacity=".62"/><polygon points="88,70 140,96 140,146 88,120" fill="'+c+'" fill-opacity=".34"/><polygon points="192,70 140,96 140,146 192,120" fill="'+c+'" fill-opacity=".18"/><g stroke="#fff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"><line x1="100" y1="94" x2="126" y2="107"/><line x1="100" y1="102" x2="126" y2="115"/><line x1="100" y1="110" x2="118" y2="119"/></g></svg>';
+}
+function illus(mk,val){
+  return '<div class="p-illus"><span class="cap">Um negócio. Novas conexões.</span>'+iso(mk.c)+'<ol class="tl"><li><small>01 / Entrada</small><span>Demanda identificada</span></li><li class="on"><small>02 / Transformação</small><span>Operação com IA</span></li><li><small>03 / Valor</small><span>'+esc(cut(val,46))+'</span></li></ol></div>';
+}
+function panelMarket(i){
+  var mk=MK[i];
+  return '<div class="p-top"><span class="eyebrow">Mercado '+pad(i+1)+' / '+MK.length+'</span><span class="tagbox">Visão do setor</span></div><h2 id="detail-title">'+esc(mk.n)+'</h2><p class="p-lead">'+esc(mk.tag)+'</p>'+illus(mk,mk.f[3])+
+    '<div class="p-stats"><div><b>'+mk.v.length+'</b><span>nichos para explorar</span></div><div><b>5</b><span>etapas da jornada</span></div><div><b>IA</b><span>aplicada ao negócio</span></div></div>'+
+    '<p class="p-thesis">'+esc(mk.th)+'</p><div class="p-sec"><span class="eyebrow">Escolha onde aprofundar</span><span class="eyebrow">'+mk.v.length+' oportunidades ↓</span></div>'+
+    '<div class="niche-list">'+mk.v.map(function(v,j){return '<button type="button" class="niche-btn" data-niche="'+j+'"><span class="nn">'+pad(j+1)+'</span><span class="nt"><b>'+esc(v[0])+'</b><small>'+esc(v[1])+'</small></span><span class="arr" aria-hidden="true">↗</span></button>'}).join('')+'</div>';
+}
+function panelNiche(i,j,tab){
+  var mk=MK[i],v=mk.v[j],body='';
+  var head='<div class="p-top"><button type="button" class="linkbtn" data-backmk>← '+esc(mk.n)+'</button><span class="eyebrow">Nicho '+pad(j+1)+' / '+pad(mk.v.length)+'</span></div><h2 id="detail-title">'+esc(v[0])+'</h2><p class="p-lead">'+esc(v[1])+'</p>';
+  var tabs='<div class="ptabs" role="tablist" aria-label="Visões do nicho">'+['Oportunidade','Solução','A conta'].map(function(t,k){return '<button type="button" role="tab" aria-selected="'+(k===tab)+'" class="ptab'+(k===tab?' on':'')+'" data-tab="'+k+'"><span>'+pad(k+1)+'</span>'+t+'</button>'}).join('')+'</div>';
+  if(tab===0){
+    body=illus(mk,mk.f[3])+'<div class="p-sec"><span class="eyebrow">A tese da oportunidade</span></div><p class="p-thesis" style="margin-top:0">'+esc(mk.th)+'</p><div class="p-sec"><span class="eyebrow">Onde o negócio perde valor</span><span class="eyebrow">Explore os pontos ↓</span></div><div class="loss">'+[v[1]].concat(mk.ls.slice(0,2)).map(function(l,k){return '<div><span>'+pad(k+1)+'</span><p style="margin:0">'+esc(l)+'</p></div>'}).join('')+'</div>';
+  }else if(tab===1){
+    var labs=['Input','Intelligence','Automation','Action','Output'],txt=[mk.f[0],mk.f[1],GENERIC_AUTO,mk.f[2],mk.f[3]];
+    body='<ol class="flowlist">'+labs.map(function(l,k){return '<li><b>'+l+'</b><span>'+esc(txt[k])+'</span></li>'}).join('')+'</ol>';
+  }else{
+    var need=Math.ceil(GOAL/mk.mr),withNew=Math.max(0,Math.ceil((GOAL-3*mk.su)/mk.mr));
+    body='<div class="calc"><div><b>'+BRL(mk.su)+'</b><span>Setup de referência por cliente</span></div><div><b>'+BRL(mk.mr)+'</b><span>MRR de referência por cliente</span></div><div><b>'+need+'</b><span>clientes recorrentes para R$100K só com MRR</span></div><div><b>'+withNew+'</b><span>recorrentes se fechar 3 novos por mês</span></div></div><p class="calc-note">Valores de referência para começar a conta. Ajuste ao seu mercado na etapa 08 do playbook.</p>';
+  }
+  return head+tabs+body+'<div class="p-cta"><button type="button" class="cta" data-cta>Construir meu negócio neste nicho <span aria-hidden="true">↗</span></button></div>';
+}
+function openPanel(html){
+  var p=$('#panel');
+  $('#panel-body').innerHTML=html;$('#panel-body').scrollTop=0;
+  p.classList.add('open');p.setAttribute('aria-hidden','false');p.removeAttribute('inert');
+  $('#universe').classList.add('has-panel');
+  A.open=true;
+  Scene.setShift(narrow()?0:Math.min(690,$('#universe').getBoundingClientRect().width));
+}
+function closePanel(){
+  var p=$('#panel');
+  p.classList.remove('open');p.setAttribute('aria-hidden','true');p.setAttribute('inert','');
+  $('#universe').classList.remove('has-panel');
+  A.open=false;Scene.setShift(0);
+}
+function crumbs(){
+  var t='';
+  if(A.m>=0)t+=' / '+esc(MK[A.m].n);
+  if(A.n>=0)t+=' / '+esc(MK[A.m].v[A.n][0]);
+  $('#breadcrumb-current').innerHTML=t;
+  $('#back').hidden=A.m<0;
+  $('#explorer-foot-text').textContent=A.m<0?'Explore um mercado para começar.':MK[A.m].n+' · '+MK[A.m].v.length+' nichos para explorar';
+}
+function selectMarket(i){
+  A.m=i;A.n=-1;A.tab=0;
+  Scene.setFocus(i);
+  openPanel(panelMarket(i));
+  crumbs();renderList();
+}
+function selectNiche(j){
+  A.n=j;A.tab=0;
+  Scene.setSelected(j);
+  openPanel(panelNiche(A.m,j,0));
+  crumbs();
+}
+function backToMarket(){
+  A.n=-1;Scene.setSelected(-1);
+  openPanel(panelMarket(A.m));crumbs();
+}
+function backToUniverse(){
+  A.m=-1;A.n=-1;
+  Scene.setFocus(-1);closePanel();crumbs();renderList();
+}
+Scene.onPick=function(i){if(A.m<0)selectMarket(i);else selectNiche(i)};
+
+function buildFromNiche(mi,j){
+  var mk=MK[mi],v=mk.v[j];
+  if(S.__example)S={};
+  S.__example=false;
+  var sug=S.__sug||{},changed=0;
+  function put(k,val){var c=S[k];if(c===undefined||c===''||c===sug[k]){if(c!==val)changed++;S[k]=val;sug[k]=val}}
+  S.atlas_market=mk.n;S.atlas_niche=v[0];
+  put('n_nicho',v[0]);put('m1',v[0]);put('g_p1',v[1]);
+  put('tf1',mk.f[0]);put('tf2',mk.f[1]);put('tf3',GENERIC_AUTO);put('tf4',mk.f[2]);put('tf5',mk.f[3]);
+  put('mo_setup',String(mk.su));put('k_setup',String(mk.su));put('mo_ret',String(mk.mr));put('k_mrr',String(mk.mr));
+  S.__sug=sug;
+  save();build();refresh();status();
+  $('#selFeedback').textContent='Pré-preenchi '+changed+' campos com referências de '+mk.n+' · '+v[0]+'. Revise cada um com os dados do seu mercado.';
+  setView('work');
+}
+
+/* ---------- navegação entre etapas ---------- */
+function setView(v){
+  var at=v==='atlas';
+  $('#viewAtlas').hidden=!at;$('#viewWork').hidden=at;
+  if(at)$('#tab-atlas').setAttribute('aria-current','page');else $('#tab-atlas').removeAttribute('aria-current');
+  if(!at)$('#tab-work').setAttribute('aria-current','page');else $('#tab-work').removeAttribute('aria-current');
+  window.scrollTo({top:0});
+  if(at)requestAnimationFrame(function(){Scene.resize()});
+}
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){setView(b.dataset.view)})});
+
+/* ---------- eventos do universo ---------- */
+$('#legend-markets').addEventListener('click',function(e){var b=e.target.closest('.mk');if(b)selectMarket(+b.dataset.i)});
+$('#market-search').addEventListener('input',renderList);
+$('#panel-body').addEventListener('click',function(e){
+  var t=e.target.closest('button');if(!t)return;
+  if(t.hasAttribute('data-niche'))selectNiche(+t.dataset.niche);
+  else if(t.hasAttribute('data-backmk'))backToMarket();
+  else if(t.hasAttribute('data-tab')){A.tab=+t.dataset.tab;var sc=$('#panel-body').scrollTop;$('#panel-body').innerHTML=panelNiche(A.m,A.n,A.tab);$('#panel-body').scrollTop=sc}
+  else if(t.hasAttribute('data-cta'))buildFromNiche(A.m,A.n);
+});
+$('#panel-close').addEventListener('click',closePanel);
+$('#back').addEventListener('click',backToUniverse);
+$('#breadcrumb-home').addEventListener('click',backToUniverse);
+$('#zoom-in').addEventListener('click',function(){Scene.zoomBy(1.18)});
+$('#zoom-out').addEventListener('click',function(){Scene.zoomBy(1/1.18)});
+$('#reset-view').addEventListener('click',function(){Scene.reset()});
+$('#toggle-motion').addEventListener('click',function(){var on=Scene.toggleAuto();var b=$('#toggle-motion');b.setAttribute('aria-pressed',on?'false':'true');b.setAttribute('aria-label',on?'Pausar rotação':'Retomar rotação');b.title=on?'Pausar rotação':'Retomar rotação';b.textContent=on?'Ⅱ':'▶'});
+document.addEventListener('keydown',function(e){
+  var tg=e.target,typing=tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.tagName==='SELECT');
+  if(e.key==='/'&&!typing&&!$('#viewAtlas').hidden){e.preventDefault();$('#market-search').focus()}
+  else if(e.key==='Escape'&&A.open&&!$('#viewAtlas').hidden)closePanel();
+});
+window.addEventListener('resize',function(){if(A.open)Scene.setShift(narrow()?0:Math.min(690,$('#universe').getBoundingClientRect().width))});
+
+if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){var tm=$('#toggle-motion');tm.setAttribute('aria-pressed','true');tm.setAttribute('aria-label','Retomar rotação');tm.textContent='▶'}
+$('#market-total').textContent=MK.length;$('#total-markets').textContent=MK.length;$('#total-niches').textContent=TOTAL_NICHES;
+renderList();crumbs();build();refresh();status();
+})();
+</script>
+
+</body>
+</html>
